@@ -1,0 +1,18 @@
+package consts
+
+var (
+	NODE_CLASS_LABEL_NAME = "class"
+
+	ACTIVE_CLASS = "active"
+	IDLE_CLASS   = "idle"
+	SLEEP_CLASS  = "sleep"
+	OFF_CLASS    = "off"
+
+	ENV_DEV_LOCAL    = "DEV_LOCAL"
+	ENV_DEV_MINIKUBE = "DEV_MINIKUBE"
+	ENV_PROD         = "PROD"
+
+	MINIMUM_ACTIVE_NODES_COUNT = 2
+	MINIMUM_IDLE_NODES_COUNT   = 0
+	MINIMUM_SLEEP_NODES_COUNT  = 0
+)
