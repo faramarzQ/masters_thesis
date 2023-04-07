@@ -1,16 +1,20 @@
 package main
 
 import (
-	"fmt"
-	"scaler/internal/app"
+	"os"
 	"scaler/internal/cluster"
 	"scaler/internal/consts"
+	"scaler/internal/scaler"
+
+	"k8s.io/klog"
 )
 
 func main() {
-	fmt.Println(consts.APP_STARTED)
+	klog.Info(consts.MSG_APP_STARTED)
 
 	cluster.RegisterClientSet()
 
-	app.Scale()
+	scaler.NewScalerManager().Run()
+
+	os.Exit(0)
 }

@@ -1,12 +1,15 @@
 package consts
 
+type SCALING_TYPE string
+type NODE_CLASS string
+
 var (
 	NODE_CLASS_LABEL_NAME = "class"
 
-	ACTIVE_CLASS = "active"
-	IDLE_CLASS   = "idle"
-	SLEEP_CLASS  = "sleep"
-	OFF_CLASS    = "off"
+	ACTIVE_CLASS NODE_CLASS = "active"
+	IDLE_CLASS   NODE_CLASS = "idle"
+	SLEEP_CLASS  NODE_CLASS = "sleep"
+	OFF_CLASS    NODE_CLASS = "off"
 
 	ENV_DEV_LOCAL    = "DEV_LOCAL"
 	ENV_DEV_MINIKUBE = "DEV_MINIKUBE"
@@ -15,4 +18,15 @@ var (
 	MINIMUM_ACTIVE_NODES_COUNT = 2
 	MINIMUM_IDLE_NODES_COUNT   = 0
 	MINIMUM_SLEEP_NODES_COUNT  = 0
+
+	RANDOM_SCALER    = "Random scaler"
+	HEURISTIC_SCALER = "Heuristic scaler"
+
+	MAP_SCALER_ID_TO_NAME = map[uint]string{
+		1: RANDOM_SCALER,
+		2: HEURISTIC_SCALER,
+	}
+
+	SCALING_OUT SCALING_TYPE = "scaling out"
+	SCALING_IN  SCALING_TYPE = "scaling in"
 )

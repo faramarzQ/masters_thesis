@@ -19,7 +19,7 @@ var (
 
 type Node struct {
 	v1.Node
-	Class                   string
+	Class                   consts.NODE_CLASS
 	Hostname                string
 	AllocatableCpu          string
 	AllocatableMemory       string
@@ -36,13 +36,24 @@ type Node struct {
 
 type NodeList []Node
 
+func (nl NodeList) InClass(class consts.NODE_CLASS) NodeList {
+	var newNodeList NodeList
+	for _, node := range nl {
+		if node.Class == class {
+			newNodeList = append(newNodeList, node)
+		}
+	}
+	return newNodeList
+}
+
 func bindNode(node v1.Node) Node {
 	totalCpu, _ := node.Status.Capacity.Cpu().AsInt64()
 	totalMemory, _ := node.Status.Capacity.Memory().AsInt64()
+	var class consts.NODE_CLASS = consts.NODE_CLASS(node.Labels[consts.NODE_CLASS_LABEL_NAME])
 
 	newNode := Node{
 		node,
-		node.Labels[consts.NODE_CLASS_LABEL_NAME],
+		class,
 		node.ObjectMeta.Name,
 		node.Status.Allocatable.Cpu().String(),
 		node.Status.Allocatable.Memory().String(),
@@ -64,22 +75,24 @@ func incrementNodeClassCount(class string) {
 	NodesClassCount[class] += 1
 }
 
-func (n *Node) setClass(class string) {
-	labelPatch := fmt.Sprintf(`[{"op":"add","path":"/metadata/labels/%s","value":"%s" }]`, "class", "off")
+func (n *Node) SetClass(class consts.NODE_CLASS) {
+	fmt.Println(n.Name)
+	fmt.Println(class)
+	labelPatch := fmt.Sprintf(`[{"op":"add","path":"/metadata/labels/%s","value":"%s" }]`, "class", class)
 	_, err := Clientset.CoreV1().Nodes().Patch(context.Background(), n.Name, types.JSONPatchType, []byte(labelPatch), metav1.PatchOptions{})
 	if err != nil {
 		panic(err)
 	}
 }
 
-func resetNodesClassCountToZero() {
-	NodesClassCount = map[string]int{
-		consts.ACTIVE_CLASS: 0,
-		consts.IDLE_CLASS:   0,
-		consts.SLEEP_CLASS:  0,
-		consts.OFF_CLASS:    0,
-	}
-}
+// func resetNodesClassCountToZero() {
+// 	NodesClassCount = map[string]int{
+// 		consts.ACTIVE_CLASS: 0,
+// 		consts.IDLE_CLASS:   0,
+// 		consts.SLEEP_CLASS:  0,
+// 		consts.OFF_CLASS:    0,
+// 	}
+// }
 
 func (n Node) ListPods() PodList {
 	pods, err := Clientset.CoreV1().Pods(config.CLUSTER_NAMESPACE).List(context.Background(), metav1.ListOptions{
@@ -165,11 +178,11 @@ func ListActiveNodes() NodeList {
 }
 
 // add off label to nodes without class label
-func RegisterNodes() {
+func LabelNewNodes() {
 	nodeList := ListNodes()
 	for _, node := range nodeList {
 		if node.Class == "" {
-			node.setClass(consts.OFF_CLASS)
+			node.SetClass(consts.OFF_CLASS)
 		}
 	}
 }
