@@ -31,8 +31,9 @@ func initEnvironments() {
 }
 
 func initFlags() {
-	scalerId := *flag.Uint("scaler", 1, "EnSet to id number f the scaler application to run. Random scaler is the default")
-	ACTIVE_SCALER = consts.MAP_SCALER_ID_TO_NAME[scalerId]
+	var scalerId uint
+	flag.UintVar(&scalerId, "scaler", 1, "Set to id number of the scaler application to run. Random scaler is the default")
 
 	flag.Parse()
+	ACTIVE_SCALER = consts.MAP_SCALER_ID_TO_NAME[scalerId]
 }
