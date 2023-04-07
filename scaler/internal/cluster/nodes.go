@@ -76,8 +76,6 @@ func incrementNodeClassCount(class string) {
 }
 
 func (n *Node) SetClass(class consts.NODE_CLASS) {
-	fmt.Println(n.Name)
-	fmt.Println(class)
 	labelPatch := fmt.Sprintf(`[{"op":"add","path":"/metadata/labels/%s","value":"%s" }]`, "class", class)
 	_, err := Clientset.CoreV1().Nodes().Patch(context.Background(), n.Name, types.JSONPatchType, []byte(labelPatch), metav1.PatchOptions{})
 	if err != nil {

@@ -1,7 +1,6 @@
 package scaler
 
 import (
-	"fmt"
 	"math"
 	"math/rand"
 	"scaler/internal/cluster"
@@ -85,7 +84,6 @@ func (rs *RandomScaler) getRandomNodes(nodeList cluster.NodeList, numberOfNodesT
 			}
 		}
 
-		fmt.Println(randomNum)
 		if !nodeAlreadySelected {
 			nodesIndexesToSelect = append(nodesIndexesToSelect, randomNum)
 		}

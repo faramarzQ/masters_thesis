@@ -1,7 +1,6 @@
 package scaler
 
 import (
-	"fmt"
 	"scaler/internal/cluster"
 	"scaler/internal/consts"
 
@@ -30,9 +29,7 @@ func (bs *baseScaler) scale() {
 		toClass := bs.nodeTransitions[i].to
 		for j := 0; j < len(bs.nodeTransitions[i].nodesList); j++ {
 			node := bs.nodeTransitions[i].nodesList[j]
-			fmt.Println(toClass)
 			node.SetClass(toClass)
-
 			klog.Info("Transitioned \"" + node.Name + "\" From \"" + string(bs.nodeTransitions[i].from) + "\" To \"" + string(toClass) + "\"")
 		}
 	}

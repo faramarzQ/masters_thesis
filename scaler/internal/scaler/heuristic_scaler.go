@@ -18,7 +18,6 @@ func (hs *HeuristicScaler) getName() string {
 }
 
 func (hs *HeuristicScaler) shouldScale(clusterMetrics cluster.ClusterMetrics) bool {
-
 	return false
 }
 
