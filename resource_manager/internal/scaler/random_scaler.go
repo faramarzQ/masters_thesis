@@ -3,8 +3,8 @@ package scaler
 import (
 	"math"
 	"math/rand"
-	"scaler/internal/cluster"
-	"scaler/internal/consts"
+	"resource_manager/internal/cluster"
+	"resource_manager/internal/consts"
 	"strconv"
 	"time"
 

@@ -1,6 +1,6 @@
 package scaler
 
-import "scaler/internal/cluster"
+import "resource_manager/internal/cluster"
 
 // Every scaler application should implement this interface
 type ScalerInterface interface {

@@ -1,8 +1,8 @@
 package cluster
 
 import (
-	"scaler/config"
-	"scaler/internal/consts"
+	"resource_manager/config"
+	"resource_manager/internal/consts"
 	"sync"
 
 	"k8s.io/client-go/kubernetes"

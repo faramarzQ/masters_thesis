@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 	"math"
-	"scaler/config"
-	"scaler/internal/consts"
+	"resource_manager/config"
+	"resource_manager/internal/consts"
 
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

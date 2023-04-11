@@ -2,9 +2,9 @@ package main
 
 import (
 	"os"
-	"scaler/internal/cluster"
-	"scaler/internal/consts"
-	"scaler/internal/scaler"
+	"resource_manager/internal/cluster"
+	"resource_manager/internal/consts"
+	"resource_manager/internal/scaler"
 
 	"k8s.io/klog"
 )

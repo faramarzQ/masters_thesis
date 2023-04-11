@@ -3,7 +3,7 @@ package config
 import (
 	"flag"
 	"os"
-	"scaler/internal/consts"
+	"resource_manager/internal/consts"
 )
 
 var (
