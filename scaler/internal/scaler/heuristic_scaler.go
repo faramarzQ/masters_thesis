@@ -3,6 +3,8 @@ package scaler
 import (
 	"scaler/internal/cluster"
 	"scaler/internal/consts"
+
+	"k8s.io/klog"
 )
 
 type HeuristicScaler struct {
@@ -18,9 +20,26 @@ func (hs *HeuristicScaler) getName() string {
 }
 
 func (hs *HeuristicScaler) shouldScale(clusterMetrics cluster.ClusterMetrics) bool {
+	klog.Info(consts.MSG_RUNNING_SHOULD_SCALE)
+	defer klog.Info(consts.MSG_FINISHED_SHOULD_SCALE)
+
+	if clusterMetrics.GetAverageMemoryUtilization() > 70 {
+		return true
+	}
+
+	if clusterMetrics.GetAverageCpuUtilization() > 70 {
+		return true
+	}
+
 	return false
 }
 
-func (hs *HeuristicScaler) scale(clusterMetrics cluster.ClusterMetrics) {
+func (hs *HeuristicScaler) planScaling(clusterMetrics cluster.ClusterMetrics) {
+	klog.Info(consts.MSG_RUNNING_SHOULD_SCALE)
+	defer klog.Info(consts.MSG_FINISHED_SHOULD_SCALE)
 
 }
+
+// func (hs *HeuristicScaler) scale() {
+
+// }
