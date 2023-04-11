@@ -71,10 +71,6 @@ func bindNode(node v1.Node) Node {
 	return newNode
 }
 
-func incrementNodeClassCount(class string) {
-	NodesClassCount[class] += 1
-}
-
 func (n *Node) SetClass(class consts.NODE_CLASS) {
 	labelPatch := fmt.Sprintf(`[{"op":"add","path":"/metadata/labels/%s","value":"%s" }]`, "class", class)
 	_, err := Clientset.CoreV1().Nodes().Patch(context.Background(), n.Name, types.JSONPatchType, []byte(labelPatch), metav1.PatchOptions{})
@@ -82,15 +78,6 @@ func (n *Node) SetClass(class consts.NODE_CLASS) {
 		panic(err)
 	}
 }
-
-// func resetNodesClassCountToZero() {
-// 	NodesClassCount = map[string]int{
-// 		consts.ACTIVE_CLASS: 0,
-// 		consts.IDLE_CLASS:   0,
-// 		consts.SLEEP_CLASS:  0,
-// 		consts.OFF_CLASS:    0,
-// 	}
-// }
 
 func (n Node) ListPods() PodList {
 	pods, err := Clientset.CoreV1().Pods(config.CLUSTER_NAMESPACE).List(context.Background(), metav1.ListOptions{

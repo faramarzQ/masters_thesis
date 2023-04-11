@@ -18,7 +18,7 @@ func NewScalerManager() *ScalerManager {
 	// Register your new scaler here
 	scalerManager.RegisterActiveScaler(
 		NewRandomScaler(),
-		// NewHeuristicScaler(),
+		NewHeuristicScaler(),
 	)
 
 	return scalerManager
@@ -29,11 +29,13 @@ func (sm *ScalerManager) RegisterActiveScaler(scalers ...ScalerInterface) {
 	for _, scaler := range scalers {
 		if scaler.getName() == config.ACTIVE_SCALER {
 			sm.Scaler = scaler
+			break
 		}
 	}
 	klog.Infof(consts.MSG_REGISTERED_ACTIVE_SCALER, sm.Scaler.getName())
 }
 
+// Manages and executes the scheduler
 func (sm ScalerManager) Run() {
 	klog.Info(consts.MSG_RUNNING_SCALER_MANAGER)
 	defer klog.Info(consts.MSG_FINISHED_SCALER_MANAGER)
@@ -44,7 +46,6 @@ func (sm ScalerManager) Run() {
 
 	if sm.Scaler.shouldScale(clusterMetrics) {
 		sm.Scaler.planScaling(clusterMetrics)
+		sm.Scaler.scale()
 	}
-
-	sm.Scaler.scale()
 }
