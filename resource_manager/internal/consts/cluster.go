@@ -4,6 +4,9 @@ type SCALING_TYPE string
 type NODE_CLASS string
 
 var (
+	SCALER_APPLICATION    = "scaler"
+	SCHEDULER_APPLICATION = "scheduler"
+
 	NODE_CLASS_LABEL_NAME = "class"
 
 	ACTIVE_CLASS NODE_CLASS = "active"
@@ -27,6 +30,14 @@ var (
 		2: HEURISTIC_SCALER,
 	}
 
+	RANDOM_SCHEDULER = "RandomScheduler"
+
+	MAP_SCHEDULER_ID_TO_NAME = map[uint]string{
+		1: RANDOM_SCHEDULER,
+	}
+
 	SCALING_OUT SCALING_TYPE = "scaling out"
 	SCALING_IN  SCALING_TYPE = "scaling in"
+
+	RANDOM_SCHEDULER_NAME = "RandomScheduler"
 )

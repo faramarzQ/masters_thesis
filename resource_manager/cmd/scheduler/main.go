@@ -4,17 +4,17 @@ import (
 	"os"
 	"resource_manager/internal/cluster"
 	"resource_manager/internal/consts"
-	"resource_manager/internal/scaler"
+	"resource_manager/internal/scheduler"
 
 	"k8s.io/klog"
 )
 
 func main() {
-	klog.Info(consts.MSG_SCALER_APP_STARTED)
+	klog.Info(consts.MSG_SCHEDULER_APP_STARTED)
 
 	cluster.RegisterClientSet()
 
-	scaler.NewScalerManager().Run()
+	scheduler.NewSchedulerManager().Run()
 
 	os.Exit(0)
 }
