@@ -17,7 +17,7 @@ type Pod struct {
 
 type PodList []Pod
 
-func bindPod(pod v1.Pod) Pod {
+func BindPod(pod v1.Pod) Pod {
 	newPod := Pod{
 		pod,
 		pod.Name,

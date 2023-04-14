@@ -46,7 +46,7 @@ func (nl NodeList) InClass(class consts.NODE_CLASS) NodeList {
 	return newNodeList
 }
 
-func bindNode(node v1.Node) Node {
+func BindNode(node v1.Node) Node {
 	totalCpu, _ := node.Status.Capacity.Cpu().AsInt64()
 	totalMemory, _ := node.Status.Capacity.Memory().AsInt64()
 	var class consts.NODE_CLASS = consts.NODE_CLASS(node.Labels[consts.NODE_CLASS_LABEL_NAME])
@@ -89,7 +89,7 @@ func (n Node) ListPods() PodList {
 
 	podList := PodList{}
 	for _, pod := range pods.Items {
-		podList = append(podList, bindPod(pod))
+		podList = append(podList, BindPod(pod))
 	}
 
 	return podList
@@ -141,7 +141,7 @@ func ListNodes() NodeList {
 	nodeList := NodeList{}
 	// resetNodesClassCountToZero()
 	for _, node := range nodes.Items {
-		wrappedNode := bindNode(node)
+		wrappedNode := BindNode(node)
 		nodeList = append(nodeList, wrappedNode)
 		// incrementNodeClassCount(wrappedNode.Class)
 	}
