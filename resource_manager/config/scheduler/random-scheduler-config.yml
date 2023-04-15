@@ -1,0 +1,12 @@
+apiVersion: kubescheduler.config.k8s.io/v1
+kind: KubeSchedulerConfiguration
+leaderElection:
+  leaderElect: false
+clientConnection:
+  kubeconfig: "/etc/kubernetes/admin.conf"
+profiles:
+- schedulerName: random-scheduler
+  plugins:
+    filter:
+      enabled:
+        - name: RandomScheduler

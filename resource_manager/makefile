@@ -11,9 +11,7 @@ ENV_LOCAL := env_local.sh
 ENV_MINIKUBE := env_minikube.sh
 ENV_MINIKUBE_BIN := env_minikube_bin.sh
 
-SCHEDULER_DEFAULT_FLAGS=--authentication-kubeconfig=/etc/kubernetes/scheduler.conf --authorization-kubeconfig=/etc/kubernetes/scheduler.conf --config=random-scheduler-config.yml --secure-port=10260
-
-# Scaler
+SCHEDULER_DEFAULT_FLAGS=--authentication-kubeconfig=/etc/kubernetes/scheduler.conf --authorization-kubeconfig=/etc/kubernetes/scheduler.conf --config=../config/scheduler/random-scheduler-config.yml --secure-port=10260
 
 run-random-scaler:
 	cd $(SCRIPTS_DIR) && . ./$(ENV_LOCAL) \
