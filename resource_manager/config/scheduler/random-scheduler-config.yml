@@ -10,3 +10,9 @@ profiles:
     filter:
       enabled:
         - name: RandomScheduler
+    preScore:
+      enabled:
+        - name: 'RandomScheduler'
+    score:
+      enabled:
+        - name: 'RandomScheduler'
