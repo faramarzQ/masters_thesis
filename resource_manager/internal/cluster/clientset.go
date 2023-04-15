@@ -1,7 +1,7 @@
 package cluster
 
 import (
-	"resource_manager/config"
+	"resource_manager/internal/config"
 	"resource_manager/internal/consts"
 	"sync"
 

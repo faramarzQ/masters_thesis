@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"math"
-	"resource_manager/config"
+	"resource_manager/internal/config"
 	"resource_manager/internal/consts"
 
 	v1 "k8s.io/api/core/v1"

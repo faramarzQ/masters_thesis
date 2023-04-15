@@ -2,7 +2,7 @@ package scheduler
 
 import (
 	"os"
-	"resource_manager/config"
+	"resource_manager/internal/config"
 	"resource_manager/internal/consts"
 
 	"github.com/spf13/cobra"

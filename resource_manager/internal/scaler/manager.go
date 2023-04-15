@@ -1,8 +1,8 @@
 package scaler
 
 import (
-	"resource_manager/config"
 	"resource_manager/internal/cluster"
+	"resource_manager/internal/config"
 	"resource_manager/internal/consts"
 
 	"k8s.io/klog"

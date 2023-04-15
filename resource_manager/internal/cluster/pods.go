@@ -3,7 +3,7 @@ package cluster
 import (
 	"context"
 	"log"
-	"resource_manager/config"
+	"resource_manager/internal/config"
 
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
