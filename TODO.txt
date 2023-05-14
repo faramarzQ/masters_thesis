@@ -1,0 +1,17 @@
+Update and complete README file
+
+Random Scaler:
+    Rename active class to power class
+    Remove on to off transition
+
+Fix scaler:
+    Implement
+    Ony off to on transition
+    Have fixed number of nodes in the on class
+
+Heuristic scaler:
+    only off to on
+    scale based on threshold
+
+Random scheduler:
+    Problem: does not consider node scores
