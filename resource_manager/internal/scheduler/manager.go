@@ -2,6 +2,7 @@ package scheduler
 
 import (
 	"os"
+	"resource_manager/internal/cluster"
 	"resource_manager/internal/config"
 	"resource_manager/internal/consts"
 
@@ -51,6 +52,8 @@ func (sm *schedulerManager) RegisterActiveScheduler(schedulers ...schedulerInter
 }
 
 func (sm *schedulerManager) Run() {
+	cluster.LabelNewNodes()
+
 	if err := sm.schedulerCommand.Execute(); err != nil {
 		os.Exit(1)
 	}

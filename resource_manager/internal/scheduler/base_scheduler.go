@@ -1,21 +1,21 @@
 package scheduler
 
 type baseScheduler struct {
-	state map[string]string
+	state map[string]any
 }
 
 func newBaseScheduler() *baseScheduler {
-	return &baseScheduler{map[string]string{}}
+	return &baseScheduler{map[string]any{}}
 }
 
-func (bs *baseScheduler) set(key string, value string) {
+func (bs *baseScheduler) set(key string, value any) {
 	if bs.state == nil {
-		bs.state = map[string]string{}
+		bs.state = map[string]any{}
 	}
 
 	bs.state[key] = value
 }
 
-func (bs *baseScheduler) get(key string) string {
+func (bs *baseScheduler) get(key string) any {
 	return bs.state[key]
 }

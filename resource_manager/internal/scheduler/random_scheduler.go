@@ -60,10 +60,11 @@ func (rs *RandomScheduler) PreScore(ctx context.Context, state *framework.CycleS
 
 	// Select a random node
 	rand.Seed(time.Now().UnixNano())
-	randomIndex := rand.Intn(len(nodes))
-	fmt.Println("indx", randomIndex)
-	rs.set("selected_node_for_"+pod.Name, nodes[randomIndex].Name)
-	fmt.Println(nodes[randomIndex].Name)
+	rs.set("selected_nodes_for_"+pod.Name, []string{
+		nodes[rand.Intn(len(nodes))].Name,
+		nodes[rand.Intn(len(nodes))].Name,
+		nodes[rand.Intn(len(nodes))].Name,
+	})
 
 	klog.Info("PreScoring Pod: ", pod.Name)
 	return framework.NewStatus(status)
@@ -71,26 +72,43 @@ func (rs *RandomScheduler) PreScore(ctx context.Context, state *framework.CycleS
 
 func (rs *RandomScheduler) Score(ctx context.Context, state *framework.CycleState, p *v1.Pod, nodeName string) (int64, *framework.Status) {
 	pod := cluster.BindPod(*p)
-	var status framework.Code = framework.Success
+	// var status framework.Code = framework.Success
 	var score int64
 
-	if rs.get("selected_node_for_"+pod.Name) == nodeName {
-		score = 1
+	mostPrioritizedNodes := (rs.get("selected_nodes_for_" + pod.Name)).([]string)
+	fmt.Println(mostPrioritizedNodes)
+	for i := 0; i < len(mostPrioritizedNodes); i++ {
+		if mostPrioritizedNodes[i] == nodeName {
+			score = 20
+		}
 	}
 
 	klog.Info("Scoring Pod: ", pod.Name, " on ", nodeName, " : ", score)
-	return score, framework.NewStatus(status)
+	return score, nil
 }
 
-func (rs *RandomScheduler) ScoreExtensions() framework.ScoreExtensions {
-	return ScoreExtension{}
+func (rs *ScoreExtension) ScoreExtensions() framework.ScoreExtensions {
+	return rs
 }
 
-func (se ScoreExtension) NormalizeScore(ctx context.Context, state *framework.CycleState, p *v1.Pod, scores framework.NodeScoreList) *framework.Status {
-	// pod := cluster.BindPod(*p)
-	var status framework.Code = framework.Success
+func (se *ScoreExtension) NormalizeScore(ctx context.Context, state *framework.CycleState, p *v1.Pod, scores framework.NodeScoreList) *framework.Status {
+	var highest int64
+	for _, nodeScore := range scores {
+		highest = max(int64(highest), nodeScore.Score)
+	}
+	MaxNodeScore := 20
+	for i, nodeScore := range scores {
+		scores[i].Score = nodeScore.Score * int64(MaxNodeScore) / highest
+	}
 
-	fmt.Println(scores)
-	// klog.Info("Scoring Pod: ", pod.Name, " : ", status.String())
-	return framework.NewStatus(status)
+	fmt.Println("Normalized scores: ", scores)
+
+	return nil
+}
+
+func max(a, b int64) int64 {
+	if a < b {
+		return b
+	}
+	return a
 }
