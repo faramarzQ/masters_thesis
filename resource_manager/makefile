@@ -28,6 +28,10 @@ run-fixed-scaler-bin:
 	cd $(SCRIPTS_DIR) && . ./$(ENV_MINIKUBE_BIN) \
 	&& cd $(BIN_DIR) && APP=scaler APP_ID=2 ./scaler $(flags)
 
+run-heuristic-scaler-bin:
+	cd $(SCRIPTS_DIR) && . ./$(ENV_MINIKUBE_BIN) \
+	&& cd $(BIN_DIR) && APP=scaler APP_ID=3 ./scaler $(flags)
+
 
 # Scheduler
 

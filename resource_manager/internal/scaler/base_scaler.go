@@ -18,7 +18,7 @@ type nodeTransition struct {
 }
 
 func (bs *baseScaler) setTransitions(transitions ...nodeTransition) {
-	bs.nodeTransitions = transitions
+	bs.nodeTransitions = append(bs.nodeTransitions, transitions...)
 }
 
 func (bs *baseScaler) scale() {
