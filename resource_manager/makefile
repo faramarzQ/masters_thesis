@@ -24,6 +24,10 @@ run-random-scaler-bin:
 	cd $(SCRIPTS_DIR) && . ./$(ENV_MINIKUBE_BIN) \
 	&& cd $(BIN_DIR) && APP=scaler APP_ID=1 ./scaler $(flags)
 
+run-fixed-scaler-bin:
+	cd $(SCRIPTS_DIR) && . ./$(ENV_MINIKUBE_BIN) \
+	&& cd $(BIN_DIR) && APP=scaler APP_ID=2 ./scaler $(flags)
+
 
 # Scheduler
 

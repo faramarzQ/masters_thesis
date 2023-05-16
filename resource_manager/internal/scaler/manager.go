@@ -18,6 +18,7 @@ func NewScalerManager() *ScalerManager {
 	// Register your new scaler here
 	scalerManager.RegisterActiveScaler(
 		NewRandomScaler(),
+		NewFixedScaler(),
 		NewHeuristicScaler(),
 	)
 

@@ -22,12 +22,16 @@ var (
 	MINIMUM_IDLE_NODES_COUNT   = 0
 	MINIMUM_SLEEP_NODES_COUNT  = 0
 
+	FIXED_IDLE_NODES_COUNT = 1
+
 	RANDOM_SCALER    = "Random scaler"
 	HEURISTIC_SCALER = "Heuristic scaler"
+	FIXED_SCALER     = "Fixed scaler"
 
 	MAP_SCALER_ID_TO_NAME = map[uint]string{
 		1: RANDOM_SCALER,
-		2: HEURISTIC_SCALER,
+		2: FIXED_SCALER,
+		3: HEURISTIC_SCALER,
 	}
 
 	RANDOM_SCHEDULER = "RandomScheduler"
