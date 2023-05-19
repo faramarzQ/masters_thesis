@@ -6,6 +6,7 @@ import (
 	"math"
 	"resource_manager/internal/config"
 	"resource_manager/internal/consts"
+	"time"
 
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -71,8 +72,20 @@ func BindNode(node v1.Node) Node {
 	return newNode
 }
 
+// Updates the node's class label
 func (n *Node) SetClass(class consts.NODE_CLASS) {
-	labelPatch := fmt.Sprintf(`[{"op":"add","path":"/metadata/labels/%s","value":"%s" }]`, "class", class)
+	labelPatch := fmt.Sprintf(`[{"op":"add","path":"/metadata/labels/%s","value":"%s" }]`, consts.NODE_CLASS_LABEL_NAME, class)
+	_, err := Clientset.CoreV1().Nodes().Patch(context.Background(), n.Name, types.JSONPatchType, []byte(labelPatch), metav1.PatchOptions{})
+	if err != nil {
+		panic(err)
+	}
+
+	n.SetScaledAt(time.Now())
+}
+
+// Updates the node's scaled_at timestamp label
+func (n *Node) SetScaledAt(timestamp time.Time) {
+	labelPatch := fmt.Sprintf(`[{"op":"add","path":"/metadata/labels/%s","value":"%s" }]`, consts.NODE_SCALED_AT_LABEL_NAME, timestamp)
 	_, err := Clientset.CoreV1().Nodes().Patch(context.Background(), n.Name, types.JSONPatchType, []byte(labelPatch), metav1.PatchOptions{})
 	if err != nil {
 		panic(err)

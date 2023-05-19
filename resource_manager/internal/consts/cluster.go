@@ -7,7 +7,8 @@ var (
 	SCALER_APPLICATION    = "scaler"
 	SCHEDULER_APPLICATION = "scheduler"
 
-	NODE_CLASS_LABEL_NAME = "class"
+	NODE_CLASS_LABEL_NAME     = "class"
+	NODE_SCALED_AT_LABEL_NAME = "scaled_at"
 
 	ACTIVE_CLASS NODE_CLASS = "active"
 	IDLE_CLASS   NODE_CLASS = "idle"
