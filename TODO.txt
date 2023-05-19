@@ -1,8 +1,35 @@
 Rename active class to power class
 
 Heuristic scaler:
-    only off to on
-    scale based on threshold
+    scale out a specific number of nodes to meet a target utilization
+
+Silencer:
+    Scales in nodes periodically
+
+    for each node checks if
+        it has only one pod &&
+        the pod is inactive(zero util):
+
+        then set a idle_at label
+    
+    if it is not idle, remove the idle_at label
+    if more than on pod exists, remove th idle_at label
+
+    for each node checks if
+        it has only one pod &&
+        the pod is inactive(zero util) &&
+        it already has a idle_at label &&
+        the idle_at value is [less] than the_given_idle_time_threshold:
+
+        then continue
+
+    for each node checks if
+        it has only one pod &&
+        the pod is inactive(zero util) &&
+        it already has a idle_at label &&
+        the idle_at value is [greater] than the_given_idle_time_threshold:
+
+        then turn of the node
 
 Random scheduler:
     Problem: does not consider node scores
