@@ -1,35 +1,43 @@
-Rename active class to power class
-
 Heuristic scaler:
-    scale out a specific number of nodes to meet a target utilization
+    scale out a specific number of nodes(with a specific amount of resources) to meet a target utilization
 
-Silencer:
-    Scales in nodes periodically
+Cluster:
+    - Only consider off, idle and active classes
+    - Add annotation
+    - Add active scaler's name as annotation to the master node
 
-    for each node checks if
-        it has only one pod &&
-        the pod is inactive(zero util):
 
-        then set a idle_at label
-    
-    if it is not idle, remove the idle_at label
-    if more than on pod exists, remove th idle_at label
 
-    for each node checks if
-        it has only one pod &&
-        the pod is inactive(zero util) &&
-        it already has a idle_at label &&
-        the idle_at value is [less] than the_given_idle_time_threshold:
+Node Silencer:
+    Scales-in nodes periodically
 
-        then continue
+    - active to idle
+        If node has no function:
+            then change to idle
 
-    for each node checks if
-        it has only one pod &&
-        the pod is inactive(zero util) &&
-        it already has a idle_at label &&
-        the idle_at value is [greater] than the_given_idle_time_threshold:
+        If nodes' functions are utilized:
+            pass
 
-        then turn of the node
+        If has warm function &&
+            has been warm for a period of time:
+            then change to idle
+
+        If has warm function &&
+            has not been warm for a specific period of time:
+            pass
+
+    - idle to off
+        If has been idle for a specific period:
+            then change to off
+
+
+Pod Silencer:
+    if an active node has only one pod &&
+        that pod has zero util &&
+        then add idle label with current time annotation
 
 Random scheduler:
     Problem: does not consider node scores
+
+Proposed scheduler:
+    
