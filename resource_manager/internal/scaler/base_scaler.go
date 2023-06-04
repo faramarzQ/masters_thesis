@@ -21,6 +21,10 @@ func (bs *baseScaler) setTransitions(transitions ...nodeTransition) {
 	bs.nodeTransitions = append(bs.nodeTransitions, transitions...)
 }
 
+func (bs *baseScaler) shouldScale(_ cluster.ClusterMetrics) bool {
+	return true
+}
+
 func (bs *baseScaler) scale() {
 	klog.Info(consts.MSG_RUNNING_SCALER)
 	defer klog.Info(consts.MSG_FINISHED_SCALER)

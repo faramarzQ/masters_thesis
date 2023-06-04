@@ -28,6 +28,7 @@ var (
 	RANDOM_SCALER    = "Random scaler"
 	HEURISTIC_SCALER = "Heuristic scaler"
 	FIXED_SCALER     = "Fixed scaler"
+	SILENCER_SCALER  = "Silencer scaler"
 
 	MAP_SCALER_ID_TO_NAME = map[uint]string{
 		1: RANDOM_SCALER,

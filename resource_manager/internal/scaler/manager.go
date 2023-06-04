@@ -20,6 +20,7 @@ func NewScalerManager() *ScalerManager {
 		NewRandomScaler(),
 		NewFixedScaler(),
 		NewHeuristicScaler(),
+		NewSilencerScaler(),
 	)
 
 	return scalerManager
