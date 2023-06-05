@@ -6,6 +6,7 @@ import (
 	"math"
 	"resource_manager/internal/config"
 	"resource_manager/internal/consts"
+	"strconv"
 	"time"
 
 	v1 "k8s.io/api/core/v1"
@@ -21,6 +22,7 @@ var (
 type Node struct {
 	v1.Node
 	Class                   consts.NODE_CLASS
+	IsMaster                bool
 	Hostname                string
 	AllocatableCpu          string
 	AllocatableMemory       string
@@ -51,10 +53,13 @@ func BindNode(node v1.Node) Node {
 	totalCpu, _ := node.Status.Capacity.Cpu().AsInt64()
 	totalMemory, _ := node.Status.Capacity.Memory().AsInt64()
 	var class consts.NODE_CLASS = consts.NODE_CLASS(node.Labels[consts.NODE_CLASS_LABEL_NAME])
+	isMaster, _ := strconv.ParseBool(node.Labels[consts.NODE_IS_PRIMARY_LABEL_NAME])
+	fmt.Println(isMaster)
 
 	newNode := Node{
 		node,
 		class,
+		isMaster,
 		node.ObjectMeta.Name,
 		node.Status.Allocatable.Cpu().String(),
 		node.Status.Allocatable.Memory().String(),
@@ -83,13 +88,31 @@ func (n *Node) SetClass(class consts.NODE_CLASS) {
 	n.SetScaledAt(time.Now())
 }
 
-// Updates the node's scaled_at timestamp label
-func (n *Node) SetScaledAt(timestamp time.Time) {
-	labelPatch := fmt.Sprintf(`[{"op":"add","path":"/metadata/labels/%s","value":"%s" }]`, consts.NODE_SCALED_AT_LABEL_NAME, timestamp)
-	_, err := Clientset.CoreV1().Nodes().Patch(context.Background(), n.Name, types.JSONPatchType, []byte(labelPatch), metav1.PatchOptions{})
+// Sets an annotation on the node
+func (n *Node) SetAnnotation(key, value string) {
+	n.SetAnnotations(map[string]string{key: value})
+	_, err := Clientset.CoreV1().Nodes().Update(context.TODO(), &n.Node, metav1.UpdateOptions{})
 	if err != nil {
 		panic(err)
 	}
+}
+
+// Gets annotation value for a given key on the node
+func (n *Node) GetAnnotation(key string) string {
+	node, _ := Clientset.CoreV1().Nodes().Get(context.TODO(), n.Name, metav1.GetOptions{})
+	for annotation_name, annotation_value := range node.GetAnnotations() {
+		if annotation_name == key {
+			return annotation_value
+		}
+	}
+
+	return ""
+}
+
+// Updates the node's scaled_at timestamp
+func (n *Node) SetScaledAt(timestamp time.Time) {
+	formatted := timestamp.Format(time.RFC3339)
+	n.SetAnnotation(consts.NODE_SCALED_AT_LABEL_NAME, formatted)
 }
 
 func (n Node) ListPods() PodList {
