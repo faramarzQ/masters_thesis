@@ -1,12 +1,12 @@
 PROJECT_ROOT := $(realpath $(dir $(firstword $(MAKEFILE_LIST))))
-TOASTER_ENTRY := $(PROJECT_ROOT)/cmd/pod_toaster/main.go
+SILENCER_ENTRY := $(PROJECT_ROOT)/cmd/silencer/main.go
 SCALER_ENTRY := $(PROJECT_ROOT)/cmd/scaler/main.go
 SCHEDULER_ENTRY := $(PROJECT_ROOT)/cmd/scheduler/main.go
 
 BIN_DIR := $(PROJECT_ROOT)/bin
 SCHEDULER_OUTPUT := $(BIN_DIR)/scheduler
 SCALER_OUTPUT := $(BIN_DIR)/scaler
-TOASTER_OUTPUT := $(BIN_DIR)/toaster
+SILENCER_OUTPUT := $(BIN_DIR)/silencer
 
 SCRIPTS_DIR := $(PROJECT_ROOT)/scripts
 ENV_LOCAL := env_local.sh
@@ -14,6 +14,8 @@ ENV_MINIKUBE := env_minikube.sh
 ENV_MINIKUBE_BIN := env_minikube_bin.sh
 
 SCHEDULER_DEFAULT_FLAGS=--authentication-kubeconfig=/etc/kubernetes/scheduler.conf --authorization-kubeconfig=/etc/kubernetes/scheduler.conf --config=../config/scheduler/random-scheduler-config.yml --secure-port=10260
+
+# Scaler
 
 run-random-scaler:
 	cd $(SCRIPTS_DIR) && . ./$(ENV_LOCAL) \
@@ -48,11 +50,11 @@ run-random-scheduler-bin:
 	cd $(SCRIPTS_DIR) && . ./$(ENV_MINIKUBE_BIN) \
 	&& cd $(BIN_DIR) && APP=scheduler APP_ID=1 ./scheduler $(SCHEDULER_DEFAULT_FLAGS) $(flags)
 
-# Pod toaster
+# Silencer
 
-build-toaster:
-		go build -o $(TOASTER_OUTPUT) $(TOASTER_ENTRY) $(flags)
+build-silencer:
+		go build -o $(SILENCER_OUTPUT) $(SILENCER_ENTRY) $(flags)
 
-run-toaster:
+run-silencer:
 	cd $(SCRIPTS_DIR) && . ./$(ENV_MINIKUBE_BIN) \
-	&& cd $(BIN_DIR) && ./toaster $(flags)
+	&& cd $(BIN_DIR) && ./silencer $(flags)

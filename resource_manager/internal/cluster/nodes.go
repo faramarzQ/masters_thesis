@@ -126,6 +126,17 @@ func (n *Node) SetScaledAt(timestamp time.Time) {
 	n.SetAnnotation(consts.NODE_SCALED_AT_LABEL_NAME, formatted)
 }
 
+// Gets scaled_at label on pod
+func (n *Node) GetScaledAt() time.Time {
+	scaledAt := n.GetAnnotation(consts.NODE_SCALED_AT_LABEL_NAME)
+	date, error := time.Parse(time.RFC3339, scaledAt)
+	if error != nil {
+		panic(error)
+	}
+
+	return date
+}
+
 func (n Node) ListPods() PodList {
 	pods, err := Clientset.CoreV1().Pods(config.CLUSTER_NAMESPACE).List(context.Background(), metav1.ListOptions{
 		FieldSelector: "spec.nodeName=" + n.Name,

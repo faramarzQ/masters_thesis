@@ -6,11 +6,6 @@ Cluster:
 
 
 Node Silencer:
-    Scales-in nodes periodically
-
-    - idle to off
-        If has been idle for a specific period:
-            then change to off
 
 
 Random scheduler:
