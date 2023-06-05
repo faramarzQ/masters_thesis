@@ -54,7 +54,6 @@ func BindNode(node v1.Node) Node {
 	totalMemory, _ := node.Status.Capacity.Memory().AsInt64()
 	var class consts.NODE_CLASS = consts.NODE_CLASS(node.Labels[consts.NODE_CLASS_LABEL_NAME])
 	isMaster, _ := strconv.ParseBool(node.Labels[consts.NODE_IS_PRIMARY_LABEL_NAME])
-	fmt.Println(isMaster)
 
 	newNode := Node{
 		node,
@@ -77,6 +76,17 @@ func BindNode(node v1.Node) Node {
 	return newNode
 }
 
+// Syncs node with the cluster
+func (n *Node) Update() {
+	newNode, err := Clientset.CoreV1().Nodes().Get(context.Background(), n.Name, metav1.GetOptions{})
+	if err != nil {
+		klog.Fatal(err)
+	}
+
+	wrappedNode := BindNode(*newNode)
+	n = &wrappedNode
+}
+
 // Updates the node's class label
 func (n *Node) SetClass(class consts.NODE_CLASS) {
 	labelPatch := fmt.Sprintf(`[{"op":"add","path":"/metadata/labels/%s","value":"%s" }]`, consts.NODE_CLASS_LABEL_NAME, class)
@@ -84,6 +94,8 @@ func (n *Node) SetClass(class consts.NODE_CLASS) {
 	if err != nil {
 		panic(err)
 	}
+
+	n.Update()
 
 	n.SetScaledAt(time.Now())
 }
@@ -206,4 +218,15 @@ func LabelNewNodes() {
 			node.SetClass(consts.OFF_CLASS)
 		}
 	}
+}
+
+// Returns the master node
+func MasterNode() *Node {
+	for _, node := range ListNodes() {
+		if node.IsMaster == true {
+			return &node
+		}
+	}
+
+	return nil
 }

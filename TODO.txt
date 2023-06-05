@@ -2,9 +2,6 @@ Heuristic scaler:
     scale out a specific number of nodes(with a specific amount of resources) to meet a target utilization
 
 Cluster:
-    - Only consider off, idle and active classes
-    - Add annotation
-    - Add active scaler's name as annotation to the master node
 
 
 

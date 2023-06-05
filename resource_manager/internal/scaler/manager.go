@@ -49,5 +49,11 @@ func (sm ScalerManager) Run() {
 	if sm.Scaler.shouldScale(clusterMetrics) {
 		sm.Scaler.planScaling(clusterMetrics)
 		sm.Scaler.scale()
+		sm.postScale()
 	}
+}
+
+func (sm ScalerManager) postScale() {
+	// store executed scaler's name in the cluster
+	cluster.MasterNode().SetAnnotation(consts.ACTIVE_SCALER_LABEL_NAME, sm.Scaler.getName())
 }
