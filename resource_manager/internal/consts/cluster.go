@@ -11,6 +11,7 @@ var (
 	NODE_SCALED_AT_LABEL_NAME     = "scaled_at"
 	POD_WARM_LABEL_NAME           = "warm"
 	POD_WARMED_AT_ANNOTATION_NAME = "warmed_at"
+	TERMINATED_POD_LABEL_NAME     = "terminated"
 	NODE_IS_PRIMARY_LABEL_NAME    = "minikube.k8s.io/primary"
 	ACTIVE_SCALER_LABEL_NAME      = "active_scaler"
 
@@ -28,6 +29,8 @@ var (
 	MINIMUM_SLEEP_NODES_COUNT  = 0
 
 	FIXED_IDLE_NODES_COUNT = 1
+
+	WARM_POD_DURATION_MINUTES = 10
 
 	RANDOM_SCALER    = "Random scaler"
 	HEURISTIC_SCALER = "Heuristic scaler"

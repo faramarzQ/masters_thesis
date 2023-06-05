@@ -84,7 +84,7 @@ func (n *Node) Update() {
 	}
 
 	wrappedNode := BindNode(*newNode)
-	n = &wrappedNode
+	*n = wrappedNode
 }
 
 // Updates the node's class label
@@ -96,7 +96,6 @@ func (n *Node) SetClass(class consts.NODE_CLASS) {
 	}
 
 	n.Update()
-
 	n.SetScaledAt(time.Now())
 }
 

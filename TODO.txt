@@ -8,30 +8,10 @@ Cluster:
 Node Silencer:
     Scales-in nodes periodically
 
-    - active to idle
-        If node has no function:
-            then change to idle
-
-        If nodes' functions are utilized:
-            pass
-
-        If has warm function &&
-            has been warm for a period of time:
-            then change to idle
-
-        If has warm function &&
-            has not been warm for a specific period of time:
-            pass
-
     - idle to off
         If has been idle for a specific period:
             then change to off
 
-
-Pod Silencer:
-    if an active node has only one pod &&
-        that pod has zero util &&
-        then add idle label with current time annotation
 
 Random scheduler:
     Problem: does not consider node scores

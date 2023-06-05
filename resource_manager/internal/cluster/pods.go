@@ -39,7 +39,7 @@ func (p *Pod) Update() {
 	}
 
 	wrappedPod := BindPod(*newPod)
-	p = &wrappedPod
+	*p = wrappedPod
 }
 
 // Sets an annotation on the pod
@@ -66,9 +66,7 @@ func (p *Pod) GetAnnotation(key string) string {
 // Updates the node's class label
 func (p *Pod) WarmUp() {
 	labelPatch := fmt.Sprintf(`[{"op":"add","path":"/metadata/labels/%s","value":"%s" }]`, consts.POD_WARM_LABEL_NAME, "true")
-	pod, err := Clientset.CoreV1().Pods(config.CLUSTER_NAMESPACE).Patch(context.Background(), p.Name, types.JSONPatchType, []byte(labelPatch), metav1.PatchOptions{})
-	fmt.Println(pod.Labels)
-
+	_, err := Clientset.CoreV1().Pods(config.CLUSTER_NAMESPACE).Patch(context.Background(), p.Name, types.JSONPatchType, []byte(labelPatch), metav1.PatchOptions{})
 	if err != nil {
 		panic(err)
 	}
@@ -81,6 +79,17 @@ func (p *Pod) WarmUp() {
 func (p *Pod) SetWarmedAt(timestamp time.Time) {
 	formatted := timestamp.Format(time.RFC3339)
 	p.SetAnnotation(consts.POD_WARMED_AT_ANNOTATION_NAME, formatted)
+}
+
+// Gets Warmed_at label on pod
+func (p *Pod) GetWarmedAt() time.Time {
+	warmedAt := p.GetAnnotation(consts.POD_WARMED_AT_ANNOTATION_NAME)
+	date, error := time.Parse(time.RFC3339, warmedAt)
+	if error != nil {
+		panic(error)
+	}
+
+	return date
 }
 
 // Checks if pod is labeled as warm
