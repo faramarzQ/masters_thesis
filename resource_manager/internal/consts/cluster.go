@@ -7,10 +7,12 @@ var (
 	SCALER_APPLICATION    = "scaler"
 	SCHEDULER_APPLICATION = "scheduler"
 
-	NODE_CLASS_LABEL_NAME      = "class"
-	NODE_SCALED_AT_LABEL_NAME  = "scaled_at"
-	NODE_IS_PRIMARY_LABEL_NAME = "minikube.k8s.io/primary"
-	ACTIVE_SCALER_LABEL_NAME   = "active_scaler"
+	NODE_CLASS_LABEL_NAME         = "class"
+	NODE_SCALED_AT_LABEL_NAME     = "scaled_at"
+	POD_WARM_LABEL_NAME           = "warm"
+	POD_WARMED_AT_ANNOTATION_NAME = "warmed_at"
+	NODE_IS_PRIMARY_LABEL_NAME    = "minikube.k8s.io/primary"
+	ACTIVE_SCALER_LABEL_NAME      = "active_scaler"
 
 	ACTIVE_CLASS NODE_CLASS = "active"
 	IDLE_CLASS   NODE_CLASS = "idle"
