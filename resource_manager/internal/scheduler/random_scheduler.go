@@ -40,6 +40,8 @@ func (rs *RandomScheduler) Filter(ctx context.Context, state *framework.CycleSta
 	node := cluster.BindNode(*nodeInfo.Node())
 	var status framework.Code = framework.Success
 
+	status = rs.baseFilter(pod, node)
+
 	// Only active nodes are available
 	if node.Class != consts.ACTIVE_CLASS {
 		status = framework.Unschedulable
