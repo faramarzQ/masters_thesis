@@ -21,6 +21,7 @@ func NewScalerManager() *ScalerManager {
 		NewFixedScaler(),
 		NewHeuristicScaler(),
 		NewSilencerScaler(),
+		NewProposedScaler(),
 	)
 
 	return scalerManager

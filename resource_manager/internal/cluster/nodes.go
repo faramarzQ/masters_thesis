@@ -240,3 +240,20 @@ func MasterNode() *Node {
 
 	return nil
 }
+
+// Returns dispersion of nodes across all functioning classes
+func getsNodesDispersion() map[consts.NODE_CLASS]int {
+	nodes := ListNodes()
+
+	// init state
+	state := make(map[consts.NODE_CLASS]int)
+	for _, class := range consts.FUNCTIONING_CLASSES {
+		state[class] = 0
+	}
+
+	for _, node := range nodes {
+		state[node.Class] += 1
+	}
+
+	return state
+}

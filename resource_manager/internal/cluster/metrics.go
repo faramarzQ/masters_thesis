@@ -1,13 +1,9 @@
 package cluster
 
+import "resource_manager/internal/consts"
+
 type ClusterMetrics struct {
 	ActiveNodesMetrics ActiveNodesMetrics
-}
-
-func GetClusterMetrics() ClusterMetrics {
-	return ClusterMetrics{
-		GetActiveNodesMetrics(),
-	}
 }
 
 // Metrics of cluster nodes
@@ -18,6 +14,28 @@ type NodeMetrics struct {
 
 // Calculated metric values for on every active nodes
 type ActiveNodesMetrics map[string]NodeMetrics
+
+type ClusterStatus struct {
+	ActiveClasses   []consts.NODE_CLASS
+	NodesCount      int
+	NodesDispersion map[consts.NODE_CLASS]int
+}
+
+func GetClusterStatus() ClusterStatus {
+	status := ClusterStatus{
+		ActiveClasses:   consts.FUNCTIONING_CLASSES,
+		NodesCount:      len(ListNodes()),
+		NodesDispersion: getsNodesDispersion(),
+	}
+
+	return status
+}
+
+func GetClusterMetrics() ClusterMetrics {
+	return ClusterMetrics{
+		GetActiveNodesMetrics(),
+	}
+}
 
 func GetActiveNodesMetrics() ActiveNodesMetrics {
 	activeNodes := ListActiveNodes()

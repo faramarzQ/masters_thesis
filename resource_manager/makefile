@@ -21,6 +21,10 @@ run-random-scaler:
 	cd $(SCRIPTS_DIR) && . ./$(ENV_LOCAL) \
 	&& APP=scaler APP_ID=1 go run $(SCALER_ENTRY) $(flags)
 
+run-proposed-scaler:
+	cd $(SCRIPTS_DIR) && . ./$(ENV_LOCAL) \
+	&& APP=scaler APP_ID=4 go run $(SCALER_ENTRY) $(flags)
+
 build-scaler:
 	go build -o $(SCALER_OUTPUT) $(SCALER_ENTRY) $(flags)
 
@@ -58,3 +62,9 @@ build-silencer:
 run-silencer:
 	cd $(SCRIPTS_DIR) && . ./$(ENV_MINIKUBE_BIN) \
 	&& cd $(BIN_DIR) && ./silencer $(flags)
+
+
+# AI package
+
+run-server:
+	cd pkg/ai_learner && python3 main.py

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"resource_manager/internal/cluster"
 	"resource_manager/internal/consts"
@@ -33,12 +32,7 @@ func silenceActiveNodes() {
 		targetClass = consts.OFF_CLASS
 	}
 
-	fmt.Println("here")
 	for _, node := range nodes {
-		fmt.Println("here")
-		fmt.Println(node.Annotations)
-		// node.SetClass(targetClass)
-		return
 		podCount := len(node.ListPods())
 
 		if podCount > 1 {
