@@ -1,8 +1,6 @@
 Heuristic scaler:
-    scale out a specific number of nodes(with a specific amount of resources) to meet a target utilization
 
 Cluster:
-    A function to select the efficient node for scaling
     Calculate energy consumption of a node during a specific time
     Get success request rate of requests
 
