@@ -3,6 +3,7 @@ package scaler
 import (
 	"resource_manager/internal/cluster"
 	"resource_manager/internal/consts"
+	"resource_manager/internal/database/repository"
 
 	"k8s.io/klog"
 )
@@ -33,7 +34,10 @@ func (bs *baseScaler) scale() {
 		toClass := bs.nodeTransitions[i].to
 		for j := 0; j < len(bs.nodeTransitions[i].nodesList); j++ {
 			node := bs.nodeTransitions[i].nodesList[j]
+
 			node.SetClass(toClass)
+			repository.InsertScalingLog(node.Name, toClass)
+
 			klog.Info("Transitioned \"" + node.Name + "\" From \"" + string(bs.nodeTransitions[i].from) + "\" To \"" + string(toClass) + "\"")
 		}
 	}
