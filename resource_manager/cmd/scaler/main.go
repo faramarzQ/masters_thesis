@@ -4,6 +4,7 @@ import (
 	"os"
 	"resource_manager/internal/cluster"
 	"resource_manager/internal/consts"
+	"resource_manager/internal/database"
 	"resource_manager/internal/scaler"
 
 	"k8s.io/klog"
@@ -11,6 +12,8 @@ import (
 
 func main() {
 	klog.Info(consts.MSG_SCALER_APP_STARTED)
+
+	database.Init()
 
 	cluster.RegisterClientSet()
 
