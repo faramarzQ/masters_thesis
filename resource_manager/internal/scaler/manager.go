@@ -4,6 +4,7 @@ import (
 	"resource_manager/internal/cluster"
 	"resource_manager/internal/config"
 	"resource_manager/internal/consts"
+	"resource_manager/internal/database/repository"
 
 	"k8s.io/klog"
 )
@@ -42,6 +43,8 @@ func (sm *ScalerManager) RegisterActiveScaler(scalers ...ScalerInterface) {
 func (sm ScalerManager) Run() {
 	klog.Info(consts.MSG_RUNNING_SCALER_MANAGER)
 	defer klog.Info(consts.MSG_FINISHED_SCALER_MANAGER)
+
+	repository.InsertScalerExecutionLog(sm.Scaler.getName())
 
 	cluster.LabelNewNodes()
 
