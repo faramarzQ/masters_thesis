@@ -5,7 +5,6 @@ import (
 	"math/rand"
 	"resource_manager/internal/cluster"
 	"resource_manager/internal/consts"
-	"resource_manager/internal/helpers"
 	"strconv"
 	"time"
 
@@ -50,7 +49,7 @@ func (rs *RandomScaler) planScaling(clusterMetrics cluster.ClusterMetrics) {
 	}
 
 	numberOfNodesToTransit := int64(math.Ceil(offNodesCount * percentOfNodesToTransit))
-	nodeTransition.nodesList = helpers.GetRandomNodesFromNodeList(nodes.InClass(consts.OFF_CLASS), numberOfNodesToTransit)
+	nodeTransition.nodesList = cluster.GetRandomNodesFromNodeList(nodes.InClass(consts.OFF_CLASS), numberOfNodesToTransit)
 	rs.setTransitions(nodeTransition)
 
 	klog.Info("Number of nodes to scale: " + strconv.Itoa(len(nodeTransition.nodesList)))

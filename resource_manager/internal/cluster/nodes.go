@@ -4,8 +4,10 @@ import (
 	"context"
 	"fmt"
 	"math"
+	"math/rand"
 	"resource_manager/internal/config"
 	"resource_manager/internal/consts"
+	"resource_manager/internal/helpers"
 	"strconv"
 	"time"
 
@@ -30,6 +32,7 @@ type Node struct {
 	TotalCpu                int64
 	TotalMemory             int64
 	TotalStorage            string
+	FullUtilPowerUsage      int64
 	Architecture            string
 	BootID                  string
 	ContainerRuntimeVersion string
@@ -39,6 +42,15 @@ type Node struct {
 
 type NodeList []Node
 
+// Returns string names of the node list
+func (nl NodeList) Names() []string {
+	var names []string
+	for _, node := range nl {
+		names = append(names, node.Name)
+	}
+	return names
+}
+
 func (nl NodeList) InClass(class consts.NODE_CLASS) NodeList {
 	var newNodeList NodeList
 	for _, node := range nl {
@@ -47,6 +59,24 @@ func (nl NodeList) InClass(class consts.NODE_CLASS) NodeList {
 		}
 	}
 	return newNodeList
+}
+
+// Return total memory amount on the given node list
+func (nl NodeList) TotalMemory() uint {
+	var totalMemory uint
+	for _, node := range nl {
+		totalMemory += uint(node.TotalMemory)
+	}
+	return totalMemory
+}
+
+// Return total cpu amount on the given node list
+func (nl NodeList) TotalCpu() uint {
+	var totalCpu uint
+	for _, node := range nl {
+		totalCpu += uint(node.TotalCpu)
+	}
+	return totalCpu
 }
 
 func BindNode(node v1.Node) Node {
@@ -66,6 +96,7 @@ func BindNode(node v1.Node) Node {
 		totalCpu,
 		totalMemory,
 		node.Status.Capacity.StorageEphemeral().String(),
+		4000, // TODO: read from label
 		node.Status.NodeInfo.Architecture,
 		node.Status.NodeInfo.BootID,
 		node.Status.NodeInfo.ContainerRuntimeVersion,
@@ -189,6 +220,20 @@ func (n Node) GetCpuUtilization() float64 {
 	return cpuUtilizationRounded
 }
 
+// Returns the efficiency of the node based on it's total memory and power usage,
+// the higher the better
+func (n Node) GetMemoryEfficiency() int64 {
+	efficiency := n.TotalMemory / n.FullUtilPowerUsage
+	return efficiency
+}
+
+// Returns the efficiency of the node based on it's total cpu and power usage,
+// the higher the better
+func (n Node) GetCpuEfficiency() float64 {
+	efficiency := float64(n.TotalCpu) / float64(n.FullUtilPowerUsage)
+	return efficiency
+}
+
 // List all nodes in the cluster
 func ListNodes() NodeList {
 	nodes, err := Clientset.CoreV1().Nodes().List(context.Background(), metav1.ListOptions{})
@@ -256,4 +301,77 @@ func getsNodesDispersion() map[consts.NODE_CLASS]int {
 	}
 
 	return state
+}
+
+// Returns a randomly selected node from a list of nodes
+func GetRandomNodesFromNodeList(nodeList NodeList, numberOfNodesToSelect int64) NodeList {
+	nodesIndexesToSelect := []int{}
+
+	for len(nodesIndexesToSelect) < int(numberOfNodesToSelect) {
+		rand.Seed(time.Now().UnixNano())
+		randomNum := rand.Intn(int(len(nodeList)))
+
+		var nodeAlreadySelected bool
+		for i := 0; i < len(nodesIndexesToSelect); i++ {
+			if randomNum == nodesIndexesToSelect[i] {
+				nodeAlreadySelected = true
+				break
+			}
+		}
+
+		if !nodeAlreadySelected {
+			nodesIndexesToSelect = append(nodesIndexesToSelect, randomNum)
+		}
+	}
+
+	var nodesToSelect NodeList
+	for i := 0; i < len(nodesIndexesToSelect); i++ {
+		nodesToSelect = append(nodesToSelect, nodeList[nodesIndexesToSelect[i]])
+	}
+
+	return nodesToSelect
+}
+
+// Finds the most memory efficient node in off class
+// Returns a node and a flag indicating if any node found
+func GetMostMemoryEfficientNode(exceptionNodesName []string) (*Node, bool) {
+	nodes := ListNodes().InClass(consts.OFF_CLASS)
+
+	var maxEfficiency int64
+	var mostEfficientNode Node
+	for _, node := range nodes {
+		temp := node.GetMemoryEfficiency()
+		if temp > maxEfficiency && !helpers.StringInSlice(node.Name, exceptionNodesName) {
+			maxEfficiency = temp
+			mostEfficientNode = node
+		}
+	}
+
+	if maxEfficiency == 0 {
+		return &mostEfficientNode, false
+	}
+
+	return &mostEfficientNode, true
+}
+
+// Finds the most CPU efficient node in off class
+// Returns a node and a flag indicating if any node found
+func GetMostCpuEfficientNode(exceptionNodesName []string) (*Node, bool) {
+	nodes := ListNodes().InClass(consts.OFF_CLASS)
+
+	var maxEfficiency float64
+	var mostEfficientNode Node
+	for _, node := range nodes {
+		temp := node.GetCpuEfficiency()
+		if temp > float64(maxEfficiency) && !helpers.StringInSlice(node.Name, exceptionNodesName) {
+			maxEfficiency = temp
+			mostEfficientNode = node
+		}
+	}
+
+	if maxEfficiency == 0 {
+		return &mostEfficientNode, false
+	}
+
+	return &mostEfficientNode, true
 }

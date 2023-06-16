@@ -21,6 +21,10 @@ run-random-scaler:
 	cd $(SCRIPTS_DIR) && . ./$(ENV_LOCAL) \
 	&& APP=scaler APP_ID=1 go run $(SCALER_ENTRY) $(flags)
 
+run-heuristic-scaler:
+	cd $(SCRIPTS_DIR) && . ./$(ENV_LOCAL) \
+	&& APP=scaler APP_ID=3 go run $(SCALER_ENTRY) $(flags)
+
 run-proposed-scaler:
 	cd $(SCRIPTS_DIR) && . ./$(ENV_LOCAL) \
 	&& APP=scaler APP_ID=4 go run $(SCALER_ENTRY) $(flags)

@@ -3,7 +3,6 @@ package scaler
 import (
 	"resource_manager/internal/cluster"
 	"resource_manager/internal/consts"
-	"resource_manager/internal/helpers"
 	"strconv"
 
 	"k8s.io/klog"
@@ -55,7 +54,7 @@ func (fs *FixedScaler) planScaling(cluster.ClusterMetrics) {
 
 	idleNodesCount := len(nodes.InClass(consts.IDLE_CLASS))
 	numberOfNodesToTransit := int64(consts.FIXED_IDLE_NODES_COUNT - idleNodesCount)
-	nodeTransition.nodesList = helpers.GetRandomNodesFromNodeList(nodes.InClass(consts.OFF_CLASS), numberOfNodesToTransit)
+	nodeTransition.nodesList = cluster.GetRandomNodesFromNodeList(nodes.InClass(consts.OFF_CLASS), numberOfNodesToTransit)
 	fs.setTransitions(nodeTransition)
 
 	klog.Info("Number of nodes to scale: " + strconv.Itoa(len(nodeTransition.nodesList)))
