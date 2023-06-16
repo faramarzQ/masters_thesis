@@ -24,5 +24,6 @@ func Init() {
 
 	db.AutoMigrate(
 		&model.ScalingLog{},
+		&model.ScalerExecutionLog{},
 	)
 }
