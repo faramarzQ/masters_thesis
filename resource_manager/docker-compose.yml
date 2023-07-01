@@ -16,4 +16,4 @@ services:
       - MYSQL_USER=sample_user
       - MYSQL_PASSWORD=9xz3jrd8wf
     volumes:
-      - ./volumes:/var/lib/mysql
+      - ./.volumes:/var/lib/mysql

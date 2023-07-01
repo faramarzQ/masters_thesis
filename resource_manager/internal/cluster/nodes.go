@@ -121,22 +121,28 @@ func (n *Node) Update() {
 // Updates the node's class label
 func (n *Node) SetClass(class consts.NODE_CLASS) {
 	labelPatch := fmt.Sprintf(`[{"op":"add","path":"/metadata/labels/%s","value":"%s" }]`, consts.NODE_CLASS_LABEL_NAME, class)
-	_, err := Clientset.CoreV1().Nodes().Patch(context.Background(), n.Name, types.JSONPatchType, []byte(labelPatch), metav1.PatchOptions{})
+	newNode, err := Clientset.CoreV1().Nodes().Patch(context.Background(), n.Name, types.JSONPatchType, []byte(labelPatch), metav1.PatchOptions{})
 	if err != nil {
 		panic(err)
 	}
 
-	n.Update()
+	wrappedNode := BindNode(*newNode)
+	*n = wrappedNode
 	n.SetScaledAt(time.Now())
 }
 
 // Sets an annotation on the node
 func (n *Node) SetAnnotation(key, value string) {
-	n.SetAnnotations(map[string]string{key: value})
-	_, err := Clientset.CoreV1().Nodes().Update(context.TODO(), &n.Node, metav1.UpdateOptions{})
+	annotations := n.Annotations
+	annotations[key] = value
+	n.SetAnnotations(annotations)
+	newNode, err := Clientset.CoreV1().Nodes().Update(context.TODO(), &n.Node, metav1.UpdateOptions{})
 	if err != nil {
 		panic(err)
 	}
+
+	wrappedNode := BindNode(*newNode)
+	*n = wrappedNode
 }
 
 // Gets annotation value for a given key on the node

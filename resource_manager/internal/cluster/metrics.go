@@ -1,6 +1,14 @@
 package cluster
 
-import "resource_manager/internal/consts"
+import (
+	"os"
+	"resource_manager/internal/consts"
+	"resource_manager/internal/prometheus"
+	"strconv"
+	"time"
+
+	"github.com/prometheus/common/model"
+)
 
 type ClusterMetrics struct {
 	ActiveNodesMetrics ActiveNodesMetrics
@@ -16,16 +24,18 @@ type NodeMetrics struct {
 type ActiveNodesMetrics map[string]NodeMetrics
 
 type ClusterStatus struct {
-	ActiveClasses   []consts.NODE_CLASS
-	NodesCount      int
-	NodesDispersion map[consts.NODE_CLASS]int
+	ActiveClasses      []consts.NODE_CLASS
+	NodesCount         int
+	NodesDispersion    map[consts.NODE_CLASS]int
+	SuccessfulRequests int
 }
 
 func GetClusterStatus() ClusterStatus {
 	status := ClusterStatus{
-		ActiveClasses:   consts.FUNCTIONING_CLASSES,
-		NodesCount:      len(ListNodes()),
-		NodesDispersion: getsNodesDispersion(),
+		ActiveClasses:      consts.FUNCTIONING_CLASSES,
+		NodesCount:         len(ListNodes()),
+		NodesDispersion:    getsNodesDispersion(),
+		SuccessfulRequests: getSuccessfulRequests(),
 	}
 
 	return status
@@ -66,4 +76,17 @@ func (cm ClusterMetrics) GetAverageMemoryUtilization() float64 {
 		sumMemoryUtil += resourceMetrics.MemoryUtilization
 	}
 	return sumMemoryUtil / float64(len(cm.ActiveNodesMetrics))
+}
+
+// Returns number of successful requests
+func getSuccessfulRequests() int {
+	period, _ := strconv.Atoi(os.Getenv("PROMETHEUS_SUCCESS_REQUESTS_PERIOD_MINUTE"))
+	time := time.Now().Add(time.Duration(period) * time.Minute)
+	result := prometheus.Query(os.Getenv("PROMETHEUS_METRIC_NAME_SUCCESS_REQUESTS"), time)
+
+	var successfulRequests int
+	for _, vec := range result.(model.Vector) {
+		successfulRequests += int(vec.Value)
+	}
+	return successfulRequests
 }
