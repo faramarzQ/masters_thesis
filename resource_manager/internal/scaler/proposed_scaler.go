@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"resource_manager/internal/cluster"
 	"resource_manager/internal/consts"
 
@@ -30,21 +31,14 @@ func (ps *ProposedScaler) planScaling(clusterMetrics cluster.ClusterMetrics) {
 
 	// collect metrics
 	clusterStatus := cluster.GetClusterStatus()
-	fmt.Println(clusterStatus)
+
 	json_data, err := json.Marshal(clusterStatus)
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(string(json_data))
 
-	val := cluster.ClusterStatus{}
-	json.Unmarshal(json_data, &val)
-
-	fmt.Println(val)
-
-	resp, err := http.Post("http://localhost:8080", "application/json",
+	resp, err := http.Post(os.Getenv("AI_SERVER_URL"), "application/json",
 		bytes.NewBuffer(json_data))
-
 	if err != nil {
 		log.Fatal(err)
 	}
