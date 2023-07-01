@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: fibonacci
+  labels:
+    app: fibonacci
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fibonacci
+  template:
+    metadata:
+      labels:
+        app: fibonacci
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/path: '/metrics'
+        prometheus.io/port: '3333'
+    spec:
+      containers:
+      - name: fibonacci
+        image: fibonacci:0.2
+        ports:
+        - containerPort: 3333
