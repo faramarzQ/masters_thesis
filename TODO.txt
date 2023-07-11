@@ -2,13 +2,14 @@ Heuristic scaler:
 
 Cluster:
     Calculate energy consumption of a node during a specific time
-    Get success request rate of requests
 
 Node Silencer:
-
 
 Random scheduler:
     Problem: does not consider node scores
 
 Proposed scaler:
     Implement RL model
+        Persist epsilon value in DB
+        Persist Selected action in DB
+        

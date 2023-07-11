@@ -6,6 +6,9 @@ import json
 
 
 class requestHandler(BaseHTTPRequestHandler):
+    """
+        Request handler class which includes http API handler methods
+    """
     def setHeaders(self):
         self.send_response(200)
         self.send_header('Content-type', 'text/html')
@@ -24,6 +27,8 @@ class requestHandler(BaseHTTPRequestHandler):
         body = self.readBody()
         print(body)
 
+        Test(body)
+
         self.setHeaders()
 
 def runServer():
@@ -31,8 +36,8 @@ def runServer():
     Runs an http server exposing APIs
 
     """
-    webServer = HTTPServer((hostName, serverPort), requestHandler).serve_forever()
     print("Server started http://%s:%s" % (hostName, serverPort))
+    webServer = HTTPServer((hostName, serverPort), requestHandler).serve_forever()
 
     try:
         webServer.serve_forever()
@@ -40,4 +45,4 @@ def runServer():
         pass
 
     webServer.server_close()
-    print("Server stopped.")
+    print("Server stopped.") 
