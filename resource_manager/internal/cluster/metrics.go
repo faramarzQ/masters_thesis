@@ -24,10 +24,14 @@ type NodeMetrics struct {
 type ActiveNodesMetrics map[string]NodeMetrics
 
 type ClusterStatus struct {
-	ActiveClasses      []consts.NODE_CLASS
-	NodesCount         int
-	NodesDispersion    map[consts.NODE_CLASS]int
-	SuccessfulRequests int
+	ActiveClasses        []consts.NODE_CLASS
+	NodesCount           int
+	NodesDispersion      map[consts.NODE_CLASS]int
+	SuccessfulRequests   int
+	PreviousState        string
+	PreviousActionTaken  int8
+	PreviousEpsilonValue uint8
+	ExecutedPreviously   bool
 }
 
 func GetClusterStatus() ClusterStatus {

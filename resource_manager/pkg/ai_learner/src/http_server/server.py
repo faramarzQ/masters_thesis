@@ -4,22 +4,20 @@ from src.services.rl_agent import *
 from urllib.parse import parse_qs
 import json 
 
-
 class requestHandler(BaseHTTPRequestHandler):
     """
         Request handler class which includes http API handler methods
     """
-    def setHeaders(self):
-        self.send_response(200)
-        self.send_header('Content-type', 'text/html')
-        self.end_headers()
-
     def readBody(self):
         length = int(self.headers.get('content-length'))
         postBodyBytes = self.rfile.read(length)
         body = json.loads(str(postBodyBytes,"UTF-8"))
-
         return body
+
+    def setHeaders(self):
+        self.send_response(200)
+        self.send_header('Content-Type', 'application/json')
+        self.end_headers()
 
     def do_POST(self):
         print("Post request")
@@ -27,9 +25,13 @@ class requestHandler(BaseHTTPRequestHandler):
         body = self.readBody()
         print(body)
 
-        Test(body)
+        response = Test(body)
+
+        responseString = json.dumps(response)
+        print(responseString)
 
         self.setHeaders()
+        self.wfile.write(responseString.encode(encoding='utf_8'))
 
 def runServer():
     """

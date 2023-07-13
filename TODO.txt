@@ -10,6 +10,5 @@ Random scheduler:
 
 Proposed scaler:
     Implement RL model
-        Persist epsilon value in DB
-        Persist Selected action in DB
-        
+        Pass necessary metrics to RL server to update the Q-Table
+        Take action after receiving action from RL server

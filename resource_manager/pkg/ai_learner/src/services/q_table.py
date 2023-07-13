@@ -36,6 +36,17 @@ class QTable:
         with open(QTablePath, 'wb') as f:
             pickle.dump(self.QTable, f)
 
+    def updateQValueForTheActionInPreviousState(self, previousState, previousActionTaken):
+        """
+            Updates the Q-Value for the action taken in the previous state
+        """
+        
+        # use formula to calculate Q-value
+        q_value = 12
+
+        self.QTable[previousState][previousActionTaken] = q_value
+
+
     def chooseActionForState(self, nodesDispersion):
         """
             Chooses an action for the given state
@@ -48,28 +59,31 @@ class QTable:
             state += str(count) + "-"
         state = state[:-1]
 
+        actionsListAlreadyExists = False
         if state in self.QTable.keys():
             # If the given state is in the Q-Table
             actions = self.QTable[state]
+            actionsListAlreadyExists = True
         else:
             # If not, generate it
             actions = self.GenerateActionListForState()
             self.QTable[state] = actions
 
-        if random.randrange(1,1000) > self.epsilon:
+        if random.randrange(1,1000) > self.epsilon and actionsListAlreadyExists:
             # Take greedy action most of the time
             selectedAction = 0
             bestValue = 0
             for key, value in actions.items():
-                if (value > bestValue or # To choose the action with highest value
-                    abs(key) < abs(selectedAction)): # If values are the same or less, choose one with less transition number
+                # if (value > bestValue or # To choose the action with highest value
+                if value > bestValue: # To choose the action with highest value
+                    # abs(key) < abs(selectedAction)): # If values are the same or less, choose one with less transition number
                     selectedAction = key
                     bestValue = value
         else:
             # Take random action with probability epsilon
             selectedAction = random.choice(list(actions.keys()))
 
-        return selectedAction
+        return state, selectedAction
 
     def GenerateActionListForState(self):
         """
@@ -90,3 +104,6 @@ class QTable:
             index = index +1
 
         return action
+
+    def getEpsilon(self):
+        return self.epsilon
