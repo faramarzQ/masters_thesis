@@ -12,7 +12,6 @@ func InsertScalingLog(nodeName string, class consts.NODE_CLASS) (model.ScalingLo
 	log := model.ScalingLog{
 		NodeName: nodeName,
 		Class:    class,
-		ScaledAt: time.Now(),
 	}
 
 	database.DBConn.Create(&log)

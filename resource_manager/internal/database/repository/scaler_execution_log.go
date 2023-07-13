@@ -14,15 +14,15 @@ func InsertScalerExecutionLog(scalerName string) (model.ScalerExecutionLog, erro
 	}
 
 	database.DBConn.Create(&log)
-
 	return log, nil
 }
 
 // Selects execution logs of a given scaler name
-func SelectScalingLogByScalerName(scalerName string) []model.ScalerExecutionLog {
-	logs := []model.ScalerExecutionLog{}
-
-	database.DBConn.Where("scaler_name >= ?", scalerName).Find(&logs)
-
+func GetPreviousScalerExecutionLog(scalerName string) *model.ScalerExecutionLog {
+	logs := &model.ScalerExecutionLog{}
+	tx := database.DBConn.Where("scaler_name = ?", scalerName).Preload("ScalerExecutionLogDetails").Last(&logs)
+	if tx.Error != nil {
+		return nil
+	}
 	return logs
 }
