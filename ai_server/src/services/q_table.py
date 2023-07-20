@@ -8,11 +8,12 @@ import pickle
 
 
 class QTable:
-    def __init__(self, nodesCount, nodesDispersion):
+    def __init__(self, nodesCount, nodesDispersion, epsilon):
         self.nodesCount = nodesCount
         self.nodesDispersion = nodesDispersion
-        self.epsilon = 40 # read from persisted value in DB
+        self.epsilon = epsilon - 1
         self.QTable = self.loadOrCreateTable()
+        print(self.QTable)
 
     def loadOrCreateTable(self):
         """

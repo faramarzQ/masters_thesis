@@ -20,6 +20,7 @@ class requestHandler(BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_POST(self):
+        print("------------------------------------------")
         print("Post request")
 
         body = self.readBody()
