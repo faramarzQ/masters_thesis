@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: ai-server
+  labels:
+    app: ai-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ai-server
+  template:
+    metadata:
+      labels:
+        app: ai-server
+    spec:
+      containers:
+      - name: ai-server
+        image: ai_server:0.1
+        ports:
+        - containerPort: 8080
+        volumeMounts:
+          - name:  ai-server-volume
+            mountPath: /app/src/storage
+      nodeSelector:
+        minikube.k8s.io/primary: "true"
+      volumes:
+        - name: ai-server-volume
+          emptyDir: {}
