@@ -1,5 +1,5 @@
 apiVersion: apps/v1
-kind: ReplicaSet
+kind: Deployment
 metadata:
   name: ai-server
   labels:
@@ -26,4 +26,6 @@ spec:
         minikube.k8s.io/primary: "true"
       volumes:
         - name: ai-server-volume
-          emptyDir: {}
+          hostPath:
+            path: /data
+            type: Directory
