@@ -43,3 +43,5 @@ spec:
   
         - name: prometheus-storage-volume
           emptyDir: {}
+      nodeSelector:
+        minikube.k8s.io/primary: "true"
