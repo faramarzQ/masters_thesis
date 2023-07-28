@@ -27,5 +27,5 @@ spec:
       volumes:
         - name: ai-server-volume
           hostPath:
-            path: /data
+            path: /pod_volumes/ai_server
             type: Directory
