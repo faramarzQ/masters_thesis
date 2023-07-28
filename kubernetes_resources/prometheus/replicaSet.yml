@@ -1,19 +1,30 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: ReplicaSet
 metadata:
-  name: prometheus-deployment
+  name: prometheus
   labels:
-    app: prometheus-server
+    app: prometheus
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: prometheus-server
+      app: prometheus
   template:
     metadata:
       labels:
-        app: prometheus-server
+        app: prometheus
     spec:
+      volumes:
+        - name: prometheus-volume
+          configMap:
+            defaultMode: 420
+            name: prometheus-conf
+        - name: prometheus-storage-volume
+          hostPath:
+            path: /pod_volumes/prometheus
+            type: Directory
+      nodeSelector:
+        minikube.k8s.io/primary: "true"
       containers:
         - name: prometheus
           image: prom/prometheus:v2.41.0
@@ -31,17 +42,7 @@ spec:
               cpu: 1
               memory: 1Gi
           volumeMounts:
-            - name: prometheus-config-volume
+            - name: prometheus-volume
               mountPath: /etc/prometheus/
             - name: prometheus-storage-volume
               mountPath: /prometheus/
-      volumes:
-        - name: prometheus-config-volume
-          configMap:
-            defaultMode: 420
-            name: prometheus-server-conf
-  
-        - name: prometheus-storage-volume
-          emptyDir: {}
-      nodeSelector:
-        minikube.k8s.io/primary: "true"

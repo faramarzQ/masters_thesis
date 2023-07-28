@@ -10,5 +10,5 @@ spec:
     targetPort: 9090
     nodePort: 31090
   selector:
-    app: prometheus-server
+    app: prometheus
   type: NodePort 
