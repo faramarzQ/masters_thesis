@@ -1,25 +1,27 @@
 apiVersion: apps/v1
-kind: ReplicaSet
+kind: Deployment
 metadata:
-  name: gateway
+  name: fibonacci
   labels:
-    app: gateway
+    app: fibonacci
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: gateway
+      app: fibonacci
   template:
     metadata:
       labels:
-        app: gateway
+        app: fibonacci
       annotations:
         prometheus.io/scrape: 'true'
         prometheus.io/path: '/metrics'
-        prometheus.io/port: '4444'
+        prometheus.io/port: '3333'
     spec:
+      nodeSelector:
+        worker: "true"
       containers:
-      - name: gateway
-        image: gateway:0.2
+      - name: fibonacci
+        image: fibonacci:0.2
         ports:
-        - containerPort: 4444
+        - containerPort: 3333
