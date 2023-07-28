@@ -3,7 +3,7 @@ package scaler
 import (
 	"bytes"
 	"encoding/json"
-	"log"
+	"math"
 	"net/http"
 	"os"
 	"resource_manager/internal/cluster"
@@ -45,13 +45,13 @@ func (ps *ProposedScaler) planScaling(clusterMetrics cluster.ClusterMetrics) {
 
 	payload, err := json.Marshal(clusterStatus)
 	if err != nil {
-		log.Fatal(err)
+		klog.Fatal(err)
 	}
 
 	response, err := http.Post(os.Getenv("AI_SERVER_URL"), "application/json",
 		bytes.NewBuffer(payload))
 	if err != nil {
-		log.Fatal(err)
+		klog.Fatal(err)
 	}
 
 	var responseMap map[string]interface{}
@@ -64,5 +64,71 @@ func (ps *ProposedScaler) planScaling(clusterMetrics cluster.ClusterMetrics) {
 		uint8(responseMap["epsilon"].(float64)),
 	)
 
-	// take action
+	ps.ScaleNodesBetweenOffAndIdleClasses(int8(responseMap["action"].(float64)))
+}
+
+func (ps *ProposedScaler) ScaleNodesBetweenOffAndIdleClasses(numberOfNodesToScale int8) {
+	if numberOfNodesToScale > 0 {
+		ps.ScaleNodesFromOffToIdleClass(numberOfNodesToScale)
+	} else {
+		ps.ScaleNodesFromIdleToOffClass(int8(math.Abs(float64(numberOfNodesToScale))))
+	}
+}
+
+func (ps *ProposedScaler) ScaleNodesFromOffToIdleClass(numberOfNodesToScale int8) {
+	var selectedNodes cluster.NodeList
+
+	for i := 0; i < int(numberOfNodesToScale); i++ {
+		if i%2 == 0 {
+			efficientNode, ok := cluster.GetMostMemoryEfficientNode(selectedNodes.Names(), consts.OFF_CLASS)
+			if !ok {
+				break
+			}
+			selectedNodes = append(selectedNodes, *efficientNode)
+
+		} else {
+			efficientNode, ok := cluster.GetMostMemoryEfficientNode(selectedNodes.Names(), consts.OFF_CLASS)
+			if !ok {
+				break
+			}
+			selectedNodes = append(selectedNodes, *efficientNode)
+		}
+	}
+
+	if len(selectedNodes) != 0 {
+		var nodeTransition nodeTransition
+		nodeTransition.from = consts.OFF_CLASS
+		nodeTransition.to = consts.IDLE_CLASS
+		nodeTransition.nodesList = selectedNodes
+		ps.setTransitions(nodeTransition)
+	}
+}
+
+func (ps *ProposedScaler) ScaleNodesFromIdleToOffClass(numberOfNodesToScale int8) {
+	var selectedNodes cluster.NodeList
+
+	for i := 0; i < int(numberOfNodesToScale); i++ {
+		if i%2 == 0 {
+			efficientNode, ok := cluster.GetMostMemoryEfficientNode(selectedNodes.Names(), consts.IDLE_CLASS)
+			if !ok {
+				break
+			}
+			selectedNodes = append(selectedNodes, *efficientNode)
+
+		} else {
+			efficientNode, ok := cluster.GetMostMemoryEfficientNode(selectedNodes.Names(), consts.IDLE_CLASS)
+			if !ok {
+				break
+			}
+			selectedNodes = append(selectedNodes, *efficientNode)
+		}
+	}
+
+	if len(selectedNodes) != 0 {
+		var nodeTransition nodeTransition
+		nodeTransition.from = consts.IDLE_CLASS
+		nodeTransition.to = consts.OFF_CLASS
+		nodeTransition.nodesList = selectedNodes
+		ps.setTransitions(nodeTransition)
+	}
 }

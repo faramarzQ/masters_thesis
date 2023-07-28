@@ -36,7 +36,7 @@ func (bs *baseScaler) scale() {
 			node := bs.nodeTransitions[i].nodesList[j]
 
 			node.SetClass(toClass)
-			repository.InsertScalingLog(node.Name, toClass)
+			repository.InsertScalingLog(scalerExecutionLog, node.Name, toClass)
 
 			klog.Info("Transitioned \"" + node.Name + "\" From \"" + string(bs.nodeTransitions[i].from) + "\" To \"" + string(toClass) + "\"")
 		}

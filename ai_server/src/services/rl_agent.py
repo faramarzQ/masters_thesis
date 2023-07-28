@@ -4,7 +4,13 @@ import os.path
 from src.services.q_table import QTable
 
 def Test(body):
-    q_table = QTable(body['NodesCount'], body['NodesDispersion'], body['PreviousEpsilonValue'])
+    q_table = QTable(
+        body['NodesCount'],
+        body['NodesDispersion'],
+        body['PreviousEpsilonValue'],
+        body['SuccessfulRequests'],
+        body['TotalRequests']
+    )
 
     # Pass failed requests, success requests, cpu and memory utilization
     if body["ExecutedPreviously"] == True:

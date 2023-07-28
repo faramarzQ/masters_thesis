@@ -104,7 +104,7 @@ func (hs *HeuristicScaler) listNodesToSatisfyDesiredMemoryUtil(memoriesToAdd int
 
 	var tempMemory int
 	for tempMemory < memoriesToAdd {
-		efficientNode, ok := cluster.GetMostMemoryEfficientNode(desiredNodeList.Names())
+		efficientNode, ok := cluster.GetMostMemoryEfficientNode(desiredNodeList.Names(), consts.OFF_CLASS)
 		if !ok {
 			break
 		}
@@ -122,7 +122,7 @@ func (hs *HeuristicScaler) listNodesToSatisfyDesiredCpuUtil(cpusToAdd int) clust
 
 	var tempCpu int
 	for tempCpu < cpusToAdd {
-		efficientNode, ok := cluster.GetMostCpuEfficientNode(desiredNodeList.Names())
+		efficientNode, ok := cluster.GetMostCpuEfficientNode(desiredNodeList.Names(), consts.OFF_CLASS)
 		if !ok {
 			break
 		}

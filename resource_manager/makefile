@@ -66,9 +66,3 @@ build-silencer:
 run-silencer:
 	cd $(SCRIPTS_DIR) && . ./$(ENV_MINIKUBE_BIN) \
 	&& cd $(BIN_DIR) && ./silencer $(flags)
-
-
-# AI package
-
-run-server:
-	cd pkg/ai_learner && python3 main.py

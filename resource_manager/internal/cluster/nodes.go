@@ -340,8 +340,8 @@ func GetRandomNodesFromNodeList(nodeList NodeList, numberOfNodesToSelect int64) 
 
 // Finds the most memory efficient node in off class
 // Returns a node and a flag indicating if any node found
-func GetMostMemoryEfficientNode(exceptionNodesName []string) (*Node, bool) {
-	nodes := ListNodes().InClass(consts.OFF_CLASS)
+func GetMostMemoryEfficientNode(exceptionNodesName []string, className consts.NODE_CLASS) (*Node, bool) {
+	nodes := ListNodes().InClass(className)
 
 	var maxEfficiency int64
 	var mostEfficientNode Node
@@ -362,8 +362,8 @@ func GetMostMemoryEfficientNode(exceptionNodesName []string) (*Node, bool) {
 
 // Finds the most CPU efficient node in off class
 // Returns a node and a flag indicating if any node found
-func GetMostCpuEfficientNode(exceptionNodesName []string) (*Node, bool) {
-	nodes := ListNodes().InClass(consts.OFF_CLASS)
+func GetMostCpuEfficientNode(exceptionNodesName []string, className consts.NODE_CLASS) (*Node, bool) {
+	nodes := ListNodes().InClass(className)
 
 	var maxEfficiency float64
 	var mostEfficientNode Node

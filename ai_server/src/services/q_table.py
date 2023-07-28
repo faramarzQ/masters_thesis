@@ -6,12 +6,13 @@ import random
 from tempfile import TemporaryFile
 import pickle 
 
-
 class QTable:
-    def __init__(self, nodesCount, nodesDispersion, epsilon):
+    def __init__(self, nodesCount, nodesDispersion, epsilon, successfulRequests, totalRequests):
         self.nodesCount = nodesCount
         self.nodesDispersion = nodesDispersion
         self.epsilon = epsilon - 1
+        self.successfulRequests = successfulRequests
+        self.totalRequests = totalRequests
         self.QTable = self.loadOrCreateTable()
         print(self.QTable)
 
@@ -29,7 +30,6 @@ class QTable:
 
         return QTable
 
-
     def persistQTable(self):
         """
             Persists the Q-Table as pkl file
@@ -41,11 +41,11 @@ class QTable:
         """
             Updates the Q-Value for the action taken in the previous state
         """
-        
-        # use formula to calculate Q-value
-        q_value = 12
 
-        self.QTable[previousState][previousActionTaken] = q_value
+        # use formula to calculate Q-value
+        successRate = self.successfulRequests / self.totalRequests * 100
+
+        self.QTable[previousState][previousActionTaken] = successRate
 
 
     def chooseActionForState(self, nodesDispersion):

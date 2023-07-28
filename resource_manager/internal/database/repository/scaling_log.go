@@ -8,10 +8,11 @@ import (
 )
 
 // Inserts a scaling log record
-func InsertScalingLog(nodeName string, class consts.NODE_CLASS) (model.ScalingLog, error) {
+func InsertScalingLog(scalerExecutionLog model.ScalerExecutionLog, nodeName string, class consts.NODE_CLASS) (model.ScalingLog, error) {
 	log := model.ScalingLog{
-		NodeName: nodeName,
-		Class:    class,
+		ScalerExecutionLog: scalerExecutionLog,
+		NodeName:           nodeName,
+		Class:              class,
 	}
 
 	database.DBConn.Create(&log)
