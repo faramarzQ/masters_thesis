@@ -35,7 +35,7 @@ func NewScalerManager() *ScalerManager {
 	previousScalerExecutionLog = repository.GetPreviousScalerExecutionLog(scalerManager.Scaler.getName())
 
 	// Log execution
-	scalerExecutionLog, _ = repository.InsertScalerExecutionLog(scalerManager.Scaler.getName())
+	scalerExecutionLog, _ = repository.InsertScalerExecutionLog(previousScalerExecutionLog, scalerManager.Scaler.getName())
 
 	return scalerManager
 }
@@ -63,7 +63,7 @@ func (sm ScalerManager) Run() {
 	if sm.Scaler.shouldScale(clusterMetrics) {
 		sm.Scaler.planScaling(clusterMetrics)
 		sm.Scaler.scale()
-		sm.postScale()
+		// sm.postScale()
 	}
 }
 

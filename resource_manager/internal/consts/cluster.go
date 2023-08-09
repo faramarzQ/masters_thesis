@@ -7,13 +7,16 @@ var (
 	SCALER_APPLICATION    = "scaler"
 	SCHEDULER_APPLICATION = "scheduler"
 
-	NODE_CLASS_LABEL_NAME         = "class"
-	NODE_SCALED_AT_LABEL_NAME     = "scaled_at"
-	POD_WARM_LABEL_NAME           = "warm"
-	POD_WARMED_AT_ANNOTATION_NAME = "warmed_at"
-	TERMINATED_POD_LABEL_NAME     = "terminated"
-	NODE_IS_PRIMARY_LABEL_NAME    = "minikube.k8s.io/primary"
-	ACTIVE_SCALER_LABEL_NAME      = "active_scaler"
+	NODE_CLASS_LABEL_NAME            = "class"
+	NODE_SCALED_AT_LABEL_NAME        = "scaled_at"
+	WORKER_NODE_LABEL_NAME           = "worker"
+	POD_WARM_LABEL_NAME              = "warm"
+	POD_WARMED_AT_ANNOTATION_NAME    = "warmed_at"
+	TERMINATED_POD_LABEL_NAME        = "terminated"
+	NODE_IS_PRIMARY_LABEL_NAME       = "minikube.k8s.io/primary"
+	ACTIVE_SCALER_LABEL_NAME         = "active_scaler"
+	MAX_POWER_CONSUMPTION_LABEL_NAME = "max_power_consumption"
+	MIN_POWER_CONSUMPTION_LABEL_NAME = "min_power_consumption"
 
 	ACTIVE_CLASS NODE_CLASS = "active"
 	IDLE_CLASS   NODE_CLASS = "idle"
@@ -69,4 +72,7 @@ var (
 	SCALING_IN  SCALING_TYPE = "scaling in"
 
 	RANDOM_SCHEDULER_NAME = "RandomScheduler"
+
+	PROMETHEUS_METRIC_NAME_SUCCESS_REQUESTS = "success_requests_total"
+	PROMETHEUS_METRIC_NAME_TOTAL_REQUESTS   = "requests_total"
 )

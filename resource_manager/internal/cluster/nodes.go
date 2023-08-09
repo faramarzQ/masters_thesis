@@ -2,15 +2,18 @@ package cluster
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"math"
 	"math/rand"
 	"resource_manager/internal/config"
 	"resource_manager/internal/consts"
 	"resource_manager/internal/helpers"
+	"resource_manager/internal/prometheus"
 	"strconv"
 	"time"
 
+	"github.com/prometheus/common/model"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -32,7 +35,8 @@ type Node struct {
 	TotalCpu                int64
 	TotalMemory             int64
 	TotalStorage            string
-	FullUtilPowerUsage      int64
+	MaxPowerConsumption     int64
+	MinPowerConsumption     int64
 	Architecture            string
 	BootID                  string
 	ContainerRuntimeVersion string
@@ -84,6 +88,8 @@ func BindNode(node v1.Node) Node {
 	totalMemory, _ := node.Status.Capacity.Memory().AsInt64()
 	var class consts.NODE_CLASS = consts.NODE_CLASS(node.Labels[consts.NODE_CLASS_LABEL_NAME])
 	isMaster, _ := strconv.ParseBool(node.Labels[consts.NODE_IS_PRIMARY_LABEL_NAME])
+	maxPowerConsumption, _ := strconv.Atoi(node.Annotations[consts.MAX_POWER_CONSUMPTION_LABEL_NAME])
+	minPowerConsumption, _ := strconv.Atoi(node.Annotations[consts.MIN_POWER_CONSUMPTION_LABEL_NAME])
 
 	newNode := Node{
 		node,
@@ -96,7 +102,8 @@ func BindNode(node v1.Node) Node {
 		totalCpu,
 		totalMemory,
 		node.Status.Capacity.StorageEphemeral().String(),
-		4000, // TODO: read from label
+		int64(maxPowerConsumption),
+		int64(minPowerConsumption),
 		node.Status.NodeInfo.Architecture,
 		node.Status.NodeInfo.BootID,
 		node.Status.NodeInfo.ContainerRuntimeVersion,
@@ -136,6 +143,7 @@ func (n *Node) SetAnnotation(key, value string) {
 	annotations := n.Annotations
 	annotations[key] = value
 	n.SetAnnotations(annotations)
+	fmt.Println(n.Name)
 	newNode, err := Clientset.CoreV1().Nodes().Update(context.TODO(), &n.Node, metav1.UpdateOptions{})
 	if err != nil {
 		panic(err)
@@ -229,30 +237,62 @@ func (n Node) GetCpuUtilization() float64 {
 // Returns the efficiency of the node based on it's total memory and power usage,
 // the higher the better
 func (n Node) GetMemoryEfficiency() int64 {
-	efficiency := n.TotalMemory / n.FullUtilPowerUsage
+	efficiency := n.TotalMemory / n.MaxPowerConsumption // TODO: should be max?
 	return efficiency
 }
 
 // Returns the efficiency of the node based on it's total cpu and power usage,
 // the higher the better
 func (n Node) GetCpuEfficiency() float64 {
-	efficiency := float64(n.TotalCpu) / float64(n.FullUtilPowerUsage)
+	efficiency := float64(n.TotalCpu) / float64(n.MaxPowerConsumption) // TODO: should be max?
 	return efficiency
+}
+
+// Return actual number of cores of the node
+func (n Node) GetTotalCpuCores() float64 {
+	result := prometheus.Query("machine_cpu_physical_cores{instance='"+n.Name+"'}", time.Now())
+	return float64(result.(model.Vector)[0].Value)
+}
+
+func (n Node) GetUsedCpuCoresAtGiveTime(time time.Time) (float64, error) {
+	result := prometheus.Query("sum(rate(container_cpu_usage_seconds_total{instance=~'"+n.Name+"', pod=~'fibonacci.*'}[1m]))", time)
+	if len(result.(model.Vector)) != 0 {
+		return float64(result.(model.Vector)[0].Value), nil
+	}
+	return 0, errors.New("Failed finding any data at the given time")
 }
 
 // List all nodes in the cluster
 func ListNodes() NodeList {
-	nodes, err := Clientset.CoreV1().Nodes().List(context.Background(), metav1.ListOptions{})
+	listOptions := metav1.ListOptions{
+		LabelSelector: consts.WORKER_NODE_LABEL_NAME + "=true",
+	}
+	nodes, err := Clientset.CoreV1().Nodes().List(context.Background(), listOptions)
 	if err != nil {
 		klog.Fatal(err)
 	}
 
 	nodeList := NodeList{}
-	// resetNodesClassCountToZero()
 	for _, node := range nodes.Items {
 		wrappedNode := BindNode(node)
 		nodeList = append(nodeList, wrappedNode)
-		// incrementNodeClassCount(wrappedNode.Class)
+	}
+
+	return nodeList
+}
+
+// List all nodes in the cluster
+func ListAllNodes() NodeList {
+	listOptions := metav1.ListOptions{}
+	nodes, err := Clientset.CoreV1().Nodes().List(context.Background(), listOptions)
+	if err != nil {
+		klog.Fatal(err)
+	}
+
+	nodeList := NodeList{}
+	for _, node := range nodes.Items {
+		wrappedNode := BindNode(node)
+		nodeList = append(nodeList, wrappedNode)
 	}
 
 	return nodeList
@@ -283,7 +323,7 @@ func LabelNewNodes() {
 
 // Returns the master node
 func MasterNode() *Node {
-	for _, node := range ListNodes() {
+	for _, node := range ListAllNodes() {
 		if node.IsMaster == true {
 			return &node
 		}

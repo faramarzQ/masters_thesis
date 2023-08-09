@@ -35,12 +35,16 @@ func (ps *ProposedScaler) planScaling(clusterMetrics cluster.ClusterMetrics) {
 	defer klog.Info(consts.MSG_FINISHED_SCALE_PLANNING)
 
 	// collect metrics
+	// TODO: move to cluster module
 	clusterStatus := cluster.GetClusterStatus()
 	if previousScalerExecutionLog != nil {
-		clusterStatus.ExecutedPreviously = true
-		clusterStatus.PreviousState = (*previousScalerExecutionLog).ScalerExecutionLogDetails.State
-		clusterStatus.PreviousActionTaken = (*previousScalerExecutionLog).ScalerExecutionLogDetails.ActionTaken
-		clusterStatus.PreviousEpsilonValue = (*previousScalerExecutionLog).ScalerExecutionLogDetails.EpsilonValue
+		clusterStatus.PreviousState = (*previousScalerExecutionLog).ScalerExecutionLogDetails.PreviousState
+		clusterStatus.State = (*previousScalerExecutionLog).ScalerExecutionLogDetails.State
+		clusterStatus.PreviousActionTaken = (*previousScalerExecutionLog).ScalerExecutionLogDetails.PreviousActionTaken
+		clusterStatus.ActionTaken = (*previousScalerExecutionLog).ScalerExecutionLogDetails.ActionTaken
+		clusterStatus.EpsilonValue = (*previousScalerExecutionLog).ScalerExecutionLogDetails.EpsilonValue
+		clusterStatus.ClusterEnergyConsumption = cluster.CalculateEnergyConsumption(*previousScalerExecutionLog)
+		clusterStatus.SuccessRequestRate = cluster.GetSuccessRequestRate()
 	}
 
 	payload, err := json.Marshal(clusterStatus)

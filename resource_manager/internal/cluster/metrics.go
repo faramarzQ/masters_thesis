@@ -1,8 +1,10 @@
 package cluster
 
 import (
+	"math"
 	"os"
 	"resource_manager/internal/consts"
+	databaseModels "resource_manager/internal/database/model"
 	"resource_manager/internal/prometheus"
 	"strconv"
 	"time"
@@ -25,15 +27,18 @@ type NodeMetrics struct {
 type ActiveNodesMetrics map[string]NodeMetrics
 
 type ClusterStatus struct {
-	ActiveClasses        []consts.NODE_CLASS
-	NodesCount           int
-	NodesDispersion      map[consts.NODE_CLASS]int
-	SuccessfulRequests   int
-	TotalRequests        int
-	PreviousState        string
-	PreviousActionTaken  int8
-	PreviousEpsilonValue uint8
-	ExecutedPreviously   bool
+	ActiveClasses            []consts.NODE_CLASS
+	NodesCount               int
+	NodesDispersion          map[consts.NODE_CLASS]int
+	PreviousState            string
+	State                    string
+	PreviousActionTaken      int8
+	ActionTaken              int8
+	EpsilonValue             uint8
+	SuccessRequestRate       float64
+	ClusterEnergyConsumption float64
+	SuccessRateWeight        float32
+	EnergyConsumptionWeight  float32
 }
 
 func GetClusterStatus() ClusterStatus {
@@ -42,13 +47,23 @@ func GetClusterStatus() ClusterStatus {
 		klog.Fatal(err)
 	}
 
+	successRateWeight, err := strconv.Atoi(os.Getenv("RL_SUCCESS_RATE_WEIGHT"))
+	if err != nil {
+		klog.Fatal(err)
+	}
+
+	energyConsumptionWeight, err := strconv.Atoi(os.Getenv("RL_ENERGY_CONSUMPTION_WEIGHT"))
+	if err != nil {
+		klog.Fatal(err)
+	}
+
 	status := ClusterStatus{
-		ActiveClasses:        consts.FUNCTIONING_CLASSES,
-		NodesCount:           len(ListNodes()),
-		NodesDispersion:      getsNodesDispersion(),
-		SuccessfulRequests:   getSuccessfulRequests(),
-		TotalRequests:        getTotalRequests(),
-		PreviousEpsilonValue: uint8(initialEpsilon),
+		ActiveClasses:           consts.FUNCTIONING_CLASSES,
+		NodesCount:              len(ListNodes()),
+		NodesDispersion:         getsNodesDispersion(),
+		EpsilonValue:            uint8(initialEpsilon),
+		SuccessRateWeight:       float32(successRateWeight),
+		EnergyConsumptionWeight: float32(energyConsumptionWeight),
 	}
 
 	return status
@@ -93,9 +108,9 @@ func (cm ClusterMetrics) GetAverageMemoryUtilization() float64 {
 
 // Returns number of successful requests
 func getSuccessfulRequests() int {
-	period, _ := strconv.Atoi(os.Getenv("PROMETHEUS_SUCCESS_REQUESTS_PERIOD_MINUTE"))
+	period, _ := strconv.Atoi(os.Getenv("PROMETHEUS_REQUESTS_PERIOD_MINUTE"))
 	time := time.Now().Add(time.Duration(period) * time.Minute)
-	result := prometheus.Query(os.Getenv("PROMETHEUS_METRIC_NAME_SUCCESS_REQUESTS"), time)
+	result := prometheus.Query(consts.PROMETHEUS_METRIC_NAME_SUCCESS_REQUESTS, time)
 
 	var successfulRequests int
 	for _, vec := range result.(model.Vector) {
@@ -106,13 +121,68 @@ func getSuccessfulRequests() int {
 
 // Returns tot
 func getTotalRequests() int {
-	period, _ := strconv.Atoi(os.Getenv("PROMETHEUS_TOTAL_REQUESTS_PERIOD_MINUTE"))
+	period, _ := strconv.Atoi(os.Getenv("PROMETHEUS_REQUESTS_PERIOD_MINUTE"))
 	time := time.Now().Add(time.Duration(period) * time.Minute)
-	result := prometheus.Query(os.Getenv("PROMETHEUS_METRIC_NAME_TOTAL_REQUESTS"), time)
+	result := prometheus.Query(consts.PROMETHEUS_METRIC_NAME_TOTAL_REQUESTS, time)
 
 	var totalRequests int
 	for _, vec := range result.(model.Vector) {
 		totalRequests += int(vec.Value)
 	}
 	return totalRequests
+}
+
+func GetSuccessRequestRate() float64 {
+	totalRequests := getTotalRequests()
+	if totalRequests == 0 {
+		return 0
+	}
+	return float64(getSuccessfulRequests()) / float64(getTotalRequests())
+}
+
+// Calculates energy consumption of every node during the last scaling period
+func CalculateEnergyConsumption(previousScalerExecutionLog databaseModels.ScalerExecutionLog) float64 {
+	nodes := ListNodes().InClass(consts.ACTIVE_CLASS)
+	from := previousScalerExecutionLog.CreatedAt
+	minutesAgo := int(math.Floor(time.Now().Sub(previousScalerExecutionLog.CreatedAt).Seconds() / 30)) // every 30 second
+
+	periodTimeSlots := []time.Time{}
+	for i := 0; i <= minutesAgo; i++ {
+		periodTimeSlots = append(periodTimeSlots, from.Add(time.Second*time.Duration(i*30)))
+	}
+
+	var energyConsumption float64
+	var maxEnergyConsumption float64
+	for _, node := range nodes {
+		minPower := node.MinPowerConsumption
+		maxPower := node.MaxPowerConsumption
+
+		if minPower == 0 || maxPower == 0 {
+			klog.Fatal("Minimum|Maximum power consumption is not set for node ", node.Name)
+		}
+
+		totalCpuCores := node.GetTotalCpuCores()
+
+		var energyConsumptionOfNode float64
+		var maxEnergyConsumptionOfNode float64
+		for _, slot := range periodTimeSlots {
+			usedCpuCoresInSlot, err := node.GetUsedCpuCoresAtGiveTime(slot)
+			if err != nil {
+				continue
+			}
+
+			cpuUtil := (usedCpuCoresInSlot / totalCpuCores) * 100
+			powerAtSlot := (float64(maxPower-minPower) * cpuUtil / 100) + float64(minPower)
+			energyAtSlot := powerAtSlot * (0.008333)
+			maxEnergyAtSlot := float64(maxPower) * (0.008333)
+
+			energyConsumptionOfNode += energyAtSlot
+			maxEnergyConsumptionOfNode += maxEnergyAtSlot
+		}
+
+		energyConsumption += energyConsumptionOfNode
+		maxEnergyConsumption += maxEnergyConsumptionOfNode
+	}
+
+	return energyConsumption / maxEnergyConsumption
 }

@@ -5,15 +5,10 @@ import (
 	"resource_manager/internal/database/model"
 )
 
-func InsertScalerExecutionLogDetail(scalerExecutionLog model.ScalerExecutionLog, state string, action int8, epsilon uint8) (model.ScalerExecutionLogDetails, error) {
-	log := model.ScalerExecutionLogDetails{
-		ScalerExecutionLog: scalerExecutionLog,
-		State:              state,
-		ActionTaken:        action,
-		EpsilonValue:       epsilon,
-	}
+func InsertScalerExecutionLogDetail(scalerExecutionLog model.ScalerExecutionLog, state string, action int8, epsilon uint8) {
+	scalerExecutionLog.ScalerExecutionLogDetails.State = state
+	scalerExecutionLog.ScalerExecutionLogDetails.ActionTaken = action
+	scalerExecutionLog.ScalerExecutionLogDetails.EpsilonValue = epsilon
 
-	database.DBConn.Create(&log)
-
-	return log, nil
+	database.DBConn.Save(&scalerExecutionLog.ScalerExecutionLogDetails)
 }

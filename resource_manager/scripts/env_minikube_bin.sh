@@ -1,5 +1,21 @@
 #!/bin/bash
 
 export ENV=DEV_LOCAL
-export CONFIG_DIR_DEV_LOCAL=../config/incluster_auth/config.yml
-export CLUSTER_NAMESPACE=openfaas-fn
+export CONFIG_DIR_DEV_LOCAL=../config/outcluster_auth/config.yml
+export CLUSTER_NAMESPACE=default
+
+# Database
+export DB_HOST=$DATABASE_NODEPORT_SERVICE_HOST
+export DB_PORT=$DATABASE_NODEPORT_SERVICE_PORT
+export DB_DATABASE=cluster
+export DB_USERNAME=sample_user
+export DB_PASSWORD=9xz3jrd8wf
+
+# AI Agent
+export AI_SERVER_URL=http://$AI_SERVER_NODEPORT_SERVICE_HOST:$AI_SERVER_NODEPORT_SERVICE_PORT
+export SUCCESS_RATE_WIEGHT=2
+export ENERGY_CONSUMPTION_WEIGHT=3
+
+# Prometheus
+export PROMETHEUS_URL=http://$PROMETHEUS_NODEPORT_SERVICE_HOST:$PROMETHEUS_NODEPORT_SERVICE_PORT
+
