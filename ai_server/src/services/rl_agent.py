@@ -7,17 +7,21 @@ def Test(body):
     q_table = QTable(
         body['NodesCount'],
         body['NodesDispersion'],
-        body['PreviousEpsilonValue'],
-        body['SuccessfulRequests'],
-        body['TotalRequests']
+        body["PreviousState"],
+        body["State"],
+        body["PreviousActionTaken"],
+        body["ActionTaken"],
+        body['EpsilonValue'],
+        body['EnergyConsumptionWeight'],
+        body['SuccessRateWeight']
     )
 
-    # Pass failed requests, success requests, cpu and memory utilization
-    if body["ExecutedPreviously"] == True:
-        q_table.updateQValueForTheActionInPreviousState(body["PreviousState"], body["PreviousActionTaken"])
+    # if executed before, update the q value for the state-action pair
+    if body["PreviousState"] != "":
+        q_table.updateQValueForTheActionInPreviousRun(body["SuccessRequestRate"], body['ClusterEnergyConsumption'])
 
-    state, action = q_table.chooseActionForState(body['NodesDispersion'])
+    currentState, action = q_table.chooseActionForState(body['NodesDispersion'])
 
     q_table.persistQTable()
 
-    return {"state": state, "action": action, "epsilon": q_table.getEpsilon()}
+    return {"state": currentState, "action": action, "epsilon": q_table.getEpsilon()}

@@ -7,14 +7,25 @@ from tempfile import TemporaryFile
 import pickle 
 
 class QTable:
-    def __init__(self, nodesCount, nodesDispersion, epsilon, successfulRequests, totalRequests):
+    def __init__(self, nodesCount, nodesDispersion, previousState, state, previousActionTaken, actionTaken, epsilon, energyConsumptionWeight, successRateWeight):
         self.nodesCount = nodesCount
         self.nodesDispersion = nodesDispersion
-        self.epsilon = epsilon - 1
-        self.successfulRequests = successfulRequests
-        self.totalRequests = totalRequests
+        self.epsilon = epsilon
+        self.previousState = previousState
+        self.state = state
+        self.previousActionTaken = previousActionTaken
+        self.actionTaken = actionTaken
+        self.energyConsumptionWeight = energyConsumptionWeight
+        self.successRateWeight = successRateWeight
         self.QTable = self.loadOrCreateTable()
-        print(self.QTable)
+        print("\n ----- LOADED TABLE ------", self.QTable)
+
+        # Generate a string from nodes dispersion in classes 
+        # {'active': 0, 'idle': 1, 'off': 2} => "2-1-0"
+        self.currentState = ""
+        for className, count in reversed(nodesDispersion.items()):
+            state += str(count) + "-"
+        self.currentState = state[:-1]
 
     def loadOrCreateTable(self):
         """
@@ -37,40 +48,35 @@ class QTable:
         with open(QTablePath, 'wb') as f:
             pickle.dump(self.QTable, f)
 
-    def updateQValueForTheActionInPreviousState(self, previousState, previousActionTaken):
+    def updateQValueForTheActionInPreviousRun(self, SuccessRequestRate, clusterEnergyConsumption):
         """
             Updates the Q-Value for the action taken in the previous state
         """
+        # Calculate reward
+        reward = ( self.successRateWeight * SuccessRequestRate ) - ( self.energyConsumptionWeight * clusterEnergyConsumption )
+        print("\n ------ REWARD ------ \n", reward)
 
-        # use formula to calculate Q-value
-        successRate = self.successfulRequests / self.totalRequests * 100
-
-        self.QTable[previousState][previousActionTaken] = successRate
-
+        # self.QTable[self.state][self.actionTaken] += self.alpha * (reward + self.gamma * np.max(Q[self.state]) - Q[self.previousState][previousActionTaken])
+        # TODO: correct belslman equation
+        self.QTable[self.state][self.actionTaken] = (1-self.alfa)*(self.QTable[self.state][self.actionTaken]) + self.alfa * (rewards + self.gama )
 
     def chooseActionForState(self, nodesDispersion):
         """
             Chooses an action for the given state
         """
 
-        # Generate a string from nodes dispersion in classes 
-        # {'active': 0, 'idle': 1, 'off': 2} => "2-1-0"
-        state = ""
-        for className, count in reversed(nodesDispersion.items()):
-            state += str(count) + "-"
-        state = state[:-1]
-
         actionsListAlreadyExists = False
-        if state in self.QTable.keys():
-            # If the given state is in the Q-Table
-            actions = self.QTable[state]
+        if self.currentState in self.QTable.keys():
+            # If the given self.currentState is in the Q-Table
+            actions = self.QTable[self.currentState]
             actionsListAlreadyExists = True
         else:
             # If not, generate it
             actions = self.GenerateActionListForState()
-            self.QTable[state] = actions
+            self.QTable[self.currentState] = actions
 
-        if random.randrange(1,1000) > self.epsilon and actionsListAlreadyExists:
+        if random.randrange(1,100) > self.epsilon and actionsListAlreadyExists:
+            print("------ GREEDY ACTION ------")
             # Take greedy action most of the time
             selectedAction = 0
             bestValue = 0
@@ -81,17 +87,19 @@ class QTable:
                     selectedAction = key
                     bestValue = value
         else:
+            print("------ RANDOM ACTION ------")
             # Take random action with probability epsilon
             selectedAction = random.choice(list(actions.keys()))
+            
+        # TODO: decrease epsilon value on each run
 
-        return state, selectedAction
+        return self.currentState, selectedAction
 
     def GenerateActionListForState(self):
         """
             Generates a dict of actions
         """
         action = {}
-        print(self.nodesDispersion['idle'], self.nodesDispersion['off'])
         index = -self.nodesCount
         for i in range((self.nodesCount*2)+1):
 

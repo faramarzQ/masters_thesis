@@ -14,4 +14,4 @@ COPY ./ ./
 EXPOSE 8080
 
 # Run
-CMD ["python3", "./main.py"] 
+CMD ["python3", "-u", "./main.py"] 

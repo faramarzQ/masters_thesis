@@ -24,12 +24,12 @@ class requestHandler(BaseHTTPRequestHandler):
         print("Post request")
 
         body = self.readBody()
-        print(body)
+        print("----- REQUEST -----", body)
 
         response = Test(body)
 
         responseString = json.dumps(response)
-        print(responseString)
+        print("----- RESPONSE -----", responseString)
 
         self.setHeaders()
         self.wfile.write(responseString.encode(encoding='utf_8'))
