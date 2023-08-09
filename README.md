@@ -22,3 +22,22 @@ My master's thesis project implementing a resource management service in serverl
         `kubectl run grafana -n openfaas --image=stefanprodan/faas-grafana:4.6.3 --port=3000`
         `kubectl expose pod grafana -n openfaas --type=NodePort --name=grafana`
         `minikube -p thesis-cluster -n openfaas service --url grafana`
+
+    - expose prometheus' dashboard using: 
+        `minikube -p thesis-cluster -n openfaas service wprometheus-external`
+
+
+
+-----------------
+
+expose a specific pod:
+
+kubectl expose pod fibonacci-6cc54fb8fb-559tw  -n openfaas-fn --type=NodePort --name=grafana
+
+minikube -p thesis-cluster -n openfaas-fn service grafana
+
+-----------------
+
+setup prometheus:
+
+https://devopscube.com/setup-prometheus-monitoring-on-kubernetes/
