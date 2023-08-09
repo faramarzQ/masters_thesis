@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -21,14 +21,18 @@ type response struct {
 
 var (
 	requests = prometheus.NewCounter(prometheus.CounterOpts{
-		Name:        "requests_total",
-		Help:        "Number of all requests.",
-		ConstLabels: prometheus.Labels{"instance": "gateway", "path": "requests_total", "method": "GET"},
+		Name: "requests_total",
+		Help: "Number of all requests.",
+	})
+	responseTime = prometheus.NewSummary(prometheus.SummaryOpts{
+		Name: "response_time",
+		Help: "Response time in seconds.",
 	})
 )
 
 func init() {
 	prometheus.MustRegister(requests)
+	prometheus.MustRegister(responseTime)
 }
 
 func main() {
@@ -46,9 +50,9 @@ func main() {
 // Handler for fibonacci calculator
 func handler(w http.ResponseWriter, r *http.Request) {
 	number, err := strconv.Atoi(r.URL.Query().Get("number"))
-	fmt.Println("Got a request: ", number)
+	klog.Info("Got a request: ", number)
 	if err != nil {
-		fmt.Println("Wrong input!")
+		klog.Error("Wrong input!")
 	}
 
 	requests.Inc()
@@ -60,8 +64,9 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	// ctx, cancel := context.WithTimeout(context.Background(), time.Duration(time.Second*time.Duration(requestTimeoutSeconds)))
 	// defer cancel()
 
-	ctx := context.Background()
+	start := time.Now()
 
+	ctx := context.Background()
 	fibonacciHost := string(os.Getenv("FIBONACCI_NODEPORT_SERVICE_HOST"))
 	fibonacciPort := os.Getenv("FIBONACCI_NODEPORT_SERVICE_PORT")
 	url := fmt.Sprintf("http://%s:%s?number=%d", fibonacciHost, fibonacciPort, number)
@@ -69,6 +74,9 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		klog.Fatal("Error building http request with context: %s\n", err)
 	}
+
+	duration := time.Since(start)
+	responseTime.Observe(duration.Seconds())
 
 	client := &http.Client{}
 	res, err := client.Do(req)
@@ -78,7 +86,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		log.Fatal(err)
+		klog.Fatal(err)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
