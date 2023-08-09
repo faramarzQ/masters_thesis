@@ -25,3 +25,6 @@ spec:
         image: fibonacci:0.2
         ports:
         - containerPort: 3333
+        resources:
+          limits:
+            cpu: "500m"
