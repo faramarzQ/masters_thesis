@@ -5,27 +5,33 @@ import numpy as np
 import random
 from tempfile import TemporaryFile
 import pickle 
+import math
 
 class QTable:
-    def __init__(self, nodesCount, nodesDispersion, previousState, state, previousActionTaken, actionTaken, epsilon, energyConsumptionWeight, successRateWeight):
+    def __init__(self, nodesCount, nodesDispersion, previousState, previousAction, energyConsumptionWeight, successRateWeight, alfa, gamma):
         self.nodesCount = nodesCount
         self.nodesDispersion = nodesDispersion
-        self.epsilon = epsilon
         self.previousState = previousState
-        self.state = state
-        self.previousActionTaken = previousActionTaken
-        self.actionTaken = actionTaken
+        self.previousAction = previousAction
         self.energyConsumptionWeight = energyConsumptionWeight
         self.successRateWeight = successRateWeight
+        self.alfa = alfa
+        self.gamma = gamma
         self.QTable = self.loadOrCreateTable()
-        print("\n ----- LOADED TABLE ------", self.QTable)
 
         # Generate a string from nodes dispersion in classes 
         # {'active': 0, 'idle': 1, 'off': 2} => "2-1-0"
         self.currentState = ""
         for className, count in reversed(nodesDispersion.items()):
-            state += str(count) + "-"
-        self.currentState = state[:-1]
+            self.currentState += str(count) + "-"
+        self.currentState = self.currentState[:-1]
+
+        if self.currentState not in self.QTable.keys():
+            # If the given self.currentState is not in the Q-Table, generate it
+            actions = self.GenerateActionListForState()
+            self.QTable[self.currentState] = actions
+
+        print("----- TABLE ------ \n", self.QTable)
 
     def loadOrCreateTable(self):
         """
@@ -54,43 +60,41 @@ class QTable:
         """
         # Calculate reward
         reward = ( self.successRateWeight * SuccessRequestRate ) - ( self.energyConsumptionWeight * clusterEnergyConsumption )
-        print("\n ------ REWARD ------ \n", reward)
+        print("------ REWARD ------ \n", reward)
 
         # self.QTable[self.state][self.actionTaken] += self.alpha * (reward + self.gamma * np.max(Q[self.state]) - Q[self.previousState][previousActionTaken])
-        # TODO: correct belslman equation
-        self.QTable[self.state][self.actionTaken] = (1-self.alfa)*(self.QTable[self.state][self.actionTaken]) + self.alfa * (rewards + self.gama )
+        bestQValue = 0
+        for action in self.QTable[self.currentState]:
+            if bestQValue <= self.QTable[self.currentState][action]:
+                bestQValue = self.QTable[self.currentState][action]
+
+        self.QTable[self.previousState][self.previousAction] = (1 - self.alfa) * (self.QTable[self.previousState][self.previousAction]) + self.alfa * (reward + self.gamma * bestQValue)
+
+        print("----- TABLE ------ \n", self.QTable)
 
     def chooseActionForState(self, nodesDispersion):
         """
             Chooses an action for the given state
         """
+        actions = self.QTable[self.currentState]
 
-        actionsListAlreadyExists = False
-        if self.currentState in self.QTable.keys():
-            # If the given self.currentState is in the Q-Table
-            actions = self.QTable[self.currentState]
-            actionsListAlreadyExists = True
-        else:
-            # If not, generate it
-            actions = self.GenerateActionListForState()
-            self.QTable[self.currentState] = actions
-
-        if random.randrange(1,100) > self.epsilon and actionsListAlreadyExists:
-            print("------ GREEDY ACTION ------")
+        if random.randrange(1,100) > self.epsilon:
             # Take greedy action most of the time
             selectedAction = 0
             bestValue = 0
-            for key, value in actions.items():
+            for key, value in self.QTable[self.currentState].items():
                 # if (value > bestValue or # To choose the action with highest value
                 if value > bestValue: # To choose the action with highest value
                     # abs(key) < abs(selectedAction)): # If values are the same or less, choose one with less transition number
                     selectedAction = key
                     bestValue = value
+            print("------ GREEDY ACTION ------ \n", selectedAction, bestValue)
+
         else:
-            print("------ RANDOM ACTION ------")
             # Take random action with probability epsilon
-            selectedAction = random.choice(list(actions.keys()))
-            
+            selectedAction = random.choice(list(self.QTable[self.currentState].keys()))
+            print("------ RANDOM ACTION ------ \n", selectedAction)
+
         # TODO: decrease epsilon value on each run
 
         return self.currentState, selectedAction
@@ -102,7 +106,6 @@ class QTable:
         action = {}
         index = -self.nodesCount
         for i in range((self.nodesCount*2)+1):
-
             # Pass inexecutable actions
             if ((index < 0 and -self.nodesDispersion['idle'] > index) or
                 (index > 0 and self.nodesDispersion['off'] < index)):
@@ -114,5 +117,6 @@ class QTable:
 
         return action
 
-    def getEpsilon(self):
-        return self.epsilon
+    def generateNewEpsilonValue(self, step, minimumEpsilonValue, maximumEpsilonValue, EDR):
+        self.epsilon = minimumEpsilonValue + (maximumEpsilonValue - minimumEpsilonValue) * math.pow(math.e, (-EDR * step))
+        print("------ New Epsilon ------ \n", self.epsilon)

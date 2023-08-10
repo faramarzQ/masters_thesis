@@ -27,22 +27,45 @@ type NodeMetrics struct {
 type ActiveNodesMetrics map[string]NodeMetrics
 
 type ClusterStatus struct {
+	Step                     int
 	ActiveClasses            []consts.NODE_CLASS
 	NodesCount               int
 	NodesDispersion          map[consts.NODE_CLASS]int
 	PreviousState            string
-	State                    string
-	PreviousActionTaken      int8
-	ActionTaken              int8
-	EpsilonValue             uint8
+	PreviousAction           int8
 	SuccessRequestRate       float64
 	ClusterEnergyConsumption float64
 	SuccessRateWeight        float32
 	EnergyConsumptionWeight  float32
+	Alfa                     float64
+	Gamma                    float64
+	MinimumEpsilonValue      float64
+	MaximumEpsilonValue      float64
+	EDR                      float64
 }
 
 func GetClusterStatus() ClusterStatus {
-	initialEpsilon, err := strconv.Atoi(os.Getenv("RL_INITIAL_EPSILON_VALUE"))
+	minimumEpsilonValue, err := strconv.ParseFloat(os.Getenv("RL_MINIMUM_EPSILON_VALUE"), 32)
+	if err != nil {
+		klog.Fatal(err)
+	}
+
+	maximumEpsilonValue, err := strconv.ParseFloat(os.Getenv("RL_MAXIMUM_EPSILON_VALUE"), 32)
+	if err != nil {
+		klog.Fatal(err)
+	}
+
+	edr, err := strconv.ParseFloat(os.Getenv("RL_EDR"), 32)
+	if err != nil {
+		klog.Fatal(err)
+	}
+
+	alfa, err := strconv.ParseFloat(os.Getenv("RL_ALFA_VALUE"), 32)
+	if err != nil {
+		klog.Fatal(err)
+	}
+
+	gamma, err := strconv.ParseFloat(os.Getenv("RL_GAMMA_VALUE"), 32)
 	if err != nil {
 		klog.Fatal(err)
 	}
@@ -61,9 +84,13 @@ func GetClusterStatus() ClusterStatus {
 		ActiveClasses:           consts.FUNCTIONING_CLASSES,
 		NodesCount:              len(ListNodes()),
 		NodesDispersion:         getsNodesDispersion(),
-		EpsilonValue:            uint8(initialEpsilon),
 		SuccessRateWeight:       float32(successRateWeight),
 		EnergyConsumptionWeight: float32(energyConsumptionWeight),
+		Alfa:                    alfa,
+		Gamma:                   gamma,
+		MinimumEpsilonValue:     minimumEpsilonValue,
+		MaximumEpsilonValue:     maximumEpsilonValue,
+		EDR:                     edr,
 	}
 
 	return status
@@ -142,7 +169,7 @@ func GetSuccessRequestRate() float64 {
 
 // Calculates energy consumption of every node during the last scaling period
 func CalculateEnergyConsumption(previousScalerExecutionLog databaseModels.ScalerExecutionLog) float64 {
-	nodes := ListNodes().InClass(consts.ACTIVE_CLASS)
+	nodes := ListNodes().InClass(consts.ACTIVE_CLASS) // TODO: also get idle nodes
 	from := previousScalerExecutionLog.CreatedAt
 	minutesAgo := int(math.Floor(time.Now().Sub(previousScalerExecutionLog.CreatedAt).Seconds() / 30)) // every 30 second
 

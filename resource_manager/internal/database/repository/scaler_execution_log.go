@@ -8,20 +8,16 @@ import (
 
 // Inserts a scaler execution log record
 func InsertScalerExecutionLog(previousScalerExecutionLog *model.ScalerExecutionLog, scalerName string) (model.ScalerExecutionLog, error) {
-	var previousState string
-	var previousActionTaken int8
+	step := 1
 	if previousScalerExecutionLog != nil {
-		previousState = previousScalerExecutionLog.ScalerExecutionLogDetails.State
-		previousActionTaken = previousScalerExecutionLog.ScalerExecutionLogDetails.ActionTaken
+		step = previousScalerExecutionLog.Step + 1
 	}
 
 	log := model.ScalerExecutionLog{
-		ScalerName: scalerName,
-		ExecutedAt: time.Now(),
-		ScalerExecutionLogDetails: &model.ScalerExecutionLogDetails{
-			PreviousState:       previousState,
-			PreviousActionTaken: previousActionTaken,
-		},
+		ScalerName:                scalerName,
+		Step:                      step,
+		ExecutedAt:                time.Now(),
+		ScalerExecutionLogDetails: &model.ScalerExecutionLogDetails{},
 	}
 
 	database.DBConn.Create(&log)

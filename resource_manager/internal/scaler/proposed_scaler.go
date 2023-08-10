@@ -30,6 +30,7 @@ func (rs *ProposedScaler) getName() string {
 	return consts.PROPOSED_SCALER
 }
 
+// TODO: return error
 func (ps *ProposedScaler) planScaling(clusterMetrics cluster.ClusterMetrics) {
 	klog.Info(consts.MSG_RUNNING_SCALE_PLANNING)
 	defer klog.Info(consts.MSG_FINISHED_SCALE_PLANNING)
@@ -37,12 +38,10 @@ func (ps *ProposedScaler) planScaling(clusterMetrics cluster.ClusterMetrics) {
 	// collect metrics
 	// TODO: move to cluster module
 	clusterStatus := cluster.GetClusterStatus()
+	clusterStatus.Step = scalerExecutionLog.Step
 	if previousScalerExecutionLog != nil {
-		clusterStatus.PreviousState = (*previousScalerExecutionLog).ScalerExecutionLogDetails.PreviousState
-		clusterStatus.State = (*previousScalerExecutionLog).ScalerExecutionLogDetails.State
-		clusterStatus.PreviousActionTaken = (*previousScalerExecutionLog).ScalerExecutionLogDetails.PreviousActionTaken
-		clusterStatus.ActionTaken = (*previousScalerExecutionLog).ScalerExecutionLogDetails.ActionTaken
-		clusterStatus.EpsilonValue = (*previousScalerExecutionLog).ScalerExecutionLogDetails.EpsilonValue
+		clusterStatus.PreviousState = (*previousScalerExecutionLog).ScalerExecutionLogDetails.State
+		clusterStatus.PreviousAction = (*previousScalerExecutionLog).ScalerExecutionLogDetails.ActionTaken
 		clusterStatus.ClusterEnergyConsumption = cluster.CalculateEnergyConsumption(*previousScalerExecutionLog)
 		clusterStatus.SuccessRequestRate = cluster.GetSuccessRequestRate()
 	}
@@ -65,7 +64,6 @@ func (ps *ProposedScaler) planScaling(clusterMetrics cluster.ClusterMetrics) {
 		scalerExecutionLog,
 		string(responseMap["state"].(string)),
 		int8(responseMap["action"].(float64)),
-		uint8(responseMap["epsilon"].(float64)),
 	)
 
 	ps.ScaleNodesBetweenOffAndIdleClasses(int8(responseMap["action"].(float64)))

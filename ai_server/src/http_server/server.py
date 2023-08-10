@@ -20,16 +20,15 @@ class requestHandler(BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_POST(self):
-        print("------------------------------------------")
-        print("Post request")
+        print("\n ------------------------------------------ \n")
 
         body = self.readBody()
-        print("----- REQUEST -----", body)
+        print("----- REQUEST ----- \n", body)
 
         response = Test(body)
 
         responseString = json.dumps(response)
-        print("----- RESPONSE -----", responseString)
+        print("----- RESPONSE ----- \n", responseString)
 
         self.setHeaders()
         self.wfile.write(responseString.encode(encoding='utf_8'))

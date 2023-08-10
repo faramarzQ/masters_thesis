@@ -87,9 +87,17 @@ func BindNode(node v1.Node) Node {
 	totalCpu, _ := node.Status.Capacity.Cpu().AsInt64()
 	totalMemory, _ := node.Status.Capacity.Memory().AsInt64()
 	var class consts.NODE_CLASS = consts.NODE_CLASS(node.Labels[consts.NODE_CLASS_LABEL_NAME])
-	isMaster, _ := strconv.ParseBool(node.Labels[consts.NODE_IS_PRIMARY_LABEL_NAME])
-	maxPowerConsumption, _ := strconv.Atoi(node.Annotations[consts.MAX_POWER_CONSUMPTION_LABEL_NAME])
-	minPowerConsumption, _ := strconv.Atoi(node.Annotations[consts.MIN_POWER_CONSUMPTION_LABEL_NAME])
+	isMaster, err := strconv.ParseBool(node.Labels[consts.NODE_IS_PRIMARY_LABEL_NAME])
+
+	maxPowerConsumption, err := strconv.Atoi(node.Annotations[consts.MAX_POWER_CONSUMPTION_LABEL_NAME])
+	if err != nil {
+		klog.Fatal(err)
+	}
+
+	minPowerConsumption, err := strconv.Atoi(node.Annotations[consts.MIN_POWER_CONSUMPTION_LABEL_NAME])
+	if err != nil {
+		klog.Fatal(err)
+	}
 
 	newNode := Node{
 		node,

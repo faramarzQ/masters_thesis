@@ -8,20 +8,21 @@ def Test(body):
         body['NodesCount'],
         body['NodesDispersion'],
         body["PreviousState"],
-        body["State"],
-        body["PreviousActionTaken"],
-        body["ActionTaken"],
-        body['EpsilonValue'],
+        body["PreviousAction"],
         body['EnergyConsumptionWeight'],
-        body['SuccessRateWeight']
+        body['SuccessRateWeight'],
+        body['Alfa'],
+        body['Gamma'],
     )
 
-    # if executed before, update the q value for the state-action pair
-    if body["PreviousState"] != "":
+    q_table.generateNewEpsilonValue(body['Step'], body['MinimumEpsilonValue'], body['MaximumEpsilonValue'], body['EDR'])
+
+    # if executed before, update the q value for the previous state-action pair
+    if body["Step"] != 1:
         q_table.updateQValueForTheActionInPreviousRun(body["SuccessRequestRate"], body['ClusterEnergyConsumption'])
 
     currentState, action = q_table.chooseActionForState(body['NodesDispersion'])
 
     q_table.persistQTable()
 
-    return {"state": currentState, "action": action, "epsilon": q_table.getEpsilon()}
+    return {"state": currentState, "action": action}
