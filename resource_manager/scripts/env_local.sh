@@ -1,8 +1,9 @@
 #!/bin/bash
-
 export ENV=DEV_LOCAL
-export CONFIG_DIR_DEV_LOCAL=../config/outcluster_auth/config.yml
+export CONFIG_DIR_DEV_LOCAL=config/outcluster_auth/config.yml
+export LOG_FILE_DIR=storage/logs.log
 export CLUSTER_NAMESPACE=default
+export LOG_TO_CONSOLE="false"
 
 # Database
 export DB_HOST=0.0.0.0

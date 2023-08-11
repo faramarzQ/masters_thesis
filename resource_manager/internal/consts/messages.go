@@ -4,6 +4,7 @@ var (
 	MSG_CLIENTSET_CREATED           = "Clientset created."
 	MSG_POD_TOASTER_APP_STARTED     = "Pod toaster application started."
 	MSG_SCALER_APP_STARTED          = "Scaler application started."
+	MSG_SCALER_APP_FINISHED         = "Scaler application Finished. \n ------------------------------------------\n"
 	MSG_SCHEDULER_APP_STARTED       = "Scheduler application started."
 	MSG_RUNNING_SCALER_MANAGER      = "Running the scaler manager."
 	MSG_FINISHED_SCALER_MANAGER     = "Finished the scaler manager."
