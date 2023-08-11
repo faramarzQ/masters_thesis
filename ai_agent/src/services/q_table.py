@@ -6,6 +6,7 @@ import random
 from tempfile import TemporaryFile
 import pickle 
 import math
+import logging
 
 class QTable:
     def __init__(self, nodesCount, nodesDispersion, previousState, previousAction, energyConsumptionWeight, successRateWeight, alfa, gamma):
@@ -25,13 +26,14 @@ class QTable:
         for className, count in reversed(nodesDispersion.items()):
             self.currentState += str(count) + "-"
         self.currentState = self.currentState[:-1]
+        logging.info("Current state: %s", self.currentState)
 
         if self.currentState not in self.QTable.keys():
             # If the given self.currentState is not in the Q-Table, generate it
             actions = self.GenerateActionListForState()
             self.QTable[self.currentState] = actions
 
-        print("----- TABLE ------ \n", self.QTable)
+        logging.info("Table: %s", self.QTable)
 
     def loadOrCreateTable(self):
         """
@@ -60,7 +62,7 @@ class QTable:
         """
         # Calculate reward
         reward = ( self.successRateWeight * SuccessRequestRate ) - ( self.energyConsumptionWeight * clusterEnergyConsumption )
-        print("------ REWARD ------ \n", reward)
+        logging.info("Reward: %s", reward)
 
         # self.QTable[self.state][self.actionTaken] += self.alpha * (reward + self.gamma * np.max(Q[self.state]) - Q[self.previousState][previousActionTaken])
         bestQValue = 0
@@ -70,7 +72,7 @@ class QTable:
 
         self.QTable[self.previousState][self.previousAction] = (1 - self.alfa) * (self.QTable[self.previousState][self.previousAction]) + self.alfa * (reward + self.gamma * bestQValue)
 
-        print("----- TABLE ------ \n", self.QTable)
+        logging.info("Table %s", self.QTable)
 
     def chooseActionForState(self, nodesDispersion):
         """
@@ -88,12 +90,12 @@ class QTable:
                     # abs(key) < abs(selectedAction)): # If values are the same or less, choose one with less transition number
                     selectedAction = key
                     bestValue = value
-            print("------ GREEDY ACTION ------ \n", selectedAction, bestValue)
+            logging.info("Action: greedy | Selected action: %s, QValue: %s", selectedAction, bestValue)
 
         else:
             # Take random action with probability epsilon
             selectedAction = random.choice(list(self.QTable[self.currentState].keys()))
-            print("------ RANDOM ACTION ------ \n", selectedAction)
+            logging.info("Action: random | Selected action:  %s", selectedAction)
 
         # TODO: decrease epsilon value on each run
 
@@ -119,4 +121,4 @@ class QTable:
 
     def generateNewEpsilonValue(self, step, minimumEpsilonValue, maximumEpsilonValue, EDR):
         self.epsilon = minimumEpsilonValue + (maximumEpsilonValue - minimumEpsilonValue) * math.pow(math.e, (-EDR * step))
-        print("------ New Epsilon ------ \n", self.epsilon)
+        logging.info("New epsilon:  %s", self.epsilon)

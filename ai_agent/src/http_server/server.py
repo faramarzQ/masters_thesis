@@ -3,6 +3,9 @@ from src.configs.configs import *
 from src.services.rl_agent import *
 from urllib.parse import parse_qs
 import json 
+from datetime import date
+import logging
+
 
 class requestHandler(BaseHTTPRequestHandler):
     """
@@ -14,23 +17,42 @@ class requestHandler(BaseHTTPRequestHandler):
         body = json.loads(str(postBodyBytes,"UTF-8"))
         return body
 
-    def setHeaders(self):
+    def setSuccessHeaders(self):
         self.send_response(200)
         self.send_header('Content-Type', 'application/json')
         self.end_headers()
 
+    def setInternalErrorHeaders(self):
+        self.send_response(500)
+        self.send_header('Content-Type', 'application/json')
+        self.end_headers()
+
     def do_POST(self):
-        print("\n ------------------------------------------ \n")
-
         body = self.readBody()
-        print("----- REQUEST ----- \n", body)
 
-        response = runReinforcementLearning(body)
+        logging.basicConfig(level=logging.DEBUG, filename="src/storage/logs.log", filemode="a+",
+            format="%(asctime)-15s %(levelname)-8s %(message)s")
+
+        logging.info("------------------------------------------")
+        logging.info("Run at step: %s", body["Step"])
+        print("Run at step: ", body["Step"])
+        logging.info("------------------------------------------")
+
+        logging.info("Request: %s", body)
+
+        response = {}
+        try:
+            response = runReinforcementLearning(body)
+        except Exception as e:
+            logging.error("error", exc_info=True)
+            print("Error at step: ", body["Step"])
+            self.setInternalErrorHeaders()
+            return
 
         responseString = json.dumps(response)
-        print("----- RESPONSE ----- \n", responseString)
+        logging.info("Response: %s", responseString)
 
-        self.setHeaders()
+        self.setSuccessHeaders()
         self.wfile.write(responseString.encode(encoding='utf_8'))
 
 def runServer():

@@ -3,6 +3,7 @@ package scaler
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"math"
 	"net/http"
 	"os"
@@ -55,6 +56,10 @@ func (ps *ProposedScaler) planScaling(clusterMetrics cluster.ClusterMetrics) err
 		bytes.NewBuffer(payload))
 	if err != nil {
 		return err
+	}
+
+	if response.StatusCode == http.StatusInternalServerError {
+		return errors.New("Received 500 internal server error from the AI-agent!")
 	}
 
 	var responseMap map[string]interface{}
