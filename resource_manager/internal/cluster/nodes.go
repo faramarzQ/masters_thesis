@@ -55,11 +55,14 @@ func (nl NodeList) Names() []string {
 	return names
 }
 
-func (nl NodeList) InClass(class consts.NODE_CLASS) NodeList {
+// Returns nodes from the node list which are in the given classes
+func (nl NodeList) InClass(classes ...consts.NODE_CLASS) NodeList {
 	var newNodeList NodeList
 	for _, node := range nl {
-		if node.Class == class {
-			newNodeList = append(newNodeList, node)
+		for _, class := range classes {
+			if node.Class == class {
+				newNodeList = append(newNodeList, node)
+			}
 		}
 	}
 	return newNodeList

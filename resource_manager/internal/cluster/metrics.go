@@ -169,7 +169,7 @@ func GetSuccessRequestRate() float64 {
 
 // Calculates energy consumption of every node during the last scaling period
 func CalculateEnergyConsumption(previousScalerExecutionLog databaseModels.ScalerExecutionLog) float64 {
-	nodes := ListNodes().InClass(consts.ACTIVE_CLASS) // TODO: also get idle nodes
+	nodes := ListNodes().InClass(consts.ACTIVE_CLASS, consts.IDLE_CLASS)
 	from := previousScalerExecutionLog.CreatedAt
 	minutesAgo := int(math.Floor(time.Now().Sub(previousScalerExecutionLog.CreatedAt).Seconds() / 30)) // every 30 second
 
