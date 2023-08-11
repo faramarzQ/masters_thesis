@@ -6,6 +6,8 @@ import "resource_manager/internal/cluster"
 type ScalerInterface interface {
 	getName() string
 	shouldScale(cluster.ClusterMetrics) bool
-	planScaling(cluster.ClusterMetrics)
+	prePlan()
+	planScaling(cluster.ClusterMetrics) error
 	scale()
+	onFail(err error)
 }

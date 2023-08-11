@@ -36,16 +36,18 @@ func (fs *FixedScaler) shouldScale(clusterMetrics cluster.ClusterMetrics) bool {
 	return false
 }
 
-// In case any off node exists, transits them the idle class to meet the fixed number required
-func (fs *FixedScaler) planScaling(cluster.ClusterMetrics) {
+// In case any off node exists, transits them the idle class to meet the fixed number required,
+// Nodes are selected randomly
+func (fs *FixedScaler) planScaling(cluster.ClusterMetrics) error {
 	klog.Info(consts.MSG_RUNNING_SCALE_PLANNING)
 	defer klog.Info(consts.MSG_FINISHED_SCALE_PLANNING)
 
 	nodes := cluster.ListNodes()
 
+	// TODO: move to shouldScale
 	offNodesCount := float64(len(nodes.InClass(consts.OFF_CLASS)))
 	if offNodesCount == 0 {
-		return
+		return nil
 	}
 
 	var nodeTransition nodeTransition
@@ -58,4 +60,6 @@ func (fs *FixedScaler) planScaling(cluster.ClusterMetrics) {
 	fs.setTransitions(nodeTransition)
 
 	klog.Info("Number of nodes to scale: " + strconv.Itoa(len(nodeTransition.nodesList)))
+
+	return nil
 }

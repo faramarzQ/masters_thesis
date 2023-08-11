@@ -4,8 +4,6 @@ import (
 	"resource_manager/internal/cluster"
 	"resource_manager/internal/config"
 	"resource_manager/internal/consts"
-	"resource_manager/internal/database/model"
-	"resource_manager/internal/database/repository"
 
 	"k8s.io/klog"
 )
@@ -13,11 +11,6 @@ import (
 type ScalerManager struct {
 	Scaler ScalerInterface
 }
-
-var (
-	scalerExecutionLog         model.ScalerExecutionLog
-	previousScalerExecutionLog *model.ScalerExecutionLog
-)
 
 func NewScalerManager() *ScalerManager {
 	scalerManager := &ScalerManager{}
@@ -27,15 +20,9 @@ func NewScalerManager() *ScalerManager {
 		NewRandomScaler(),
 		NewFixedScaler(),
 		NewHeuristicScaler(),
-		NewSilencerScaler(),
+		// NewSilencerScaler(),
 		NewProposedScaler(),
 	)
-
-	// Fetch previous execution log
-	previousScalerExecutionLog = repository.GetPreviousScalerExecutionLog(scalerManager.Scaler.getName())
-
-	// Log execution
-	scalerExecutionLog, _ = repository.InsertScalerExecutionLog(previousScalerExecutionLog, scalerManager.Scaler.getName())
 
 	return scalerManager
 }
@@ -61,7 +48,11 @@ func (sm ScalerManager) Run() {
 	clusterMetrics := cluster.GetClusterMetrics()
 
 	if sm.Scaler.shouldScale(clusterMetrics) {
-		sm.Scaler.planScaling(clusterMetrics)
+		sm.Scaler.prePlan()
+		err := sm.Scaler.planScaling(clusterMetrics)
+		if err != nil {
+			sm.Scaler.onFail(err)
+		}
 		sm.Scaler.scale()
 		// sm.postScale()
 	}

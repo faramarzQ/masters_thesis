@@ -35,18 +35,21 @@ func (hs *HeuristicScaler) shouldScale(clusterMetrics cluster.ClusterMetrics) bo
 	return false
 }
 
-func (hs *HeuristicScaler) planScaling(clusterMetrics cluster.ClusterMetrics) {
+func (hs *HeuristicScaler) planScaling(clusterMetrics cluster.ClusterMetrics) error {
 	klog.Info(consts.MSG_RUNNING_SCALE_PLANNING)
 	defer klog.Info(consts.MSG_FINISHED_SCALE_PLANNING)
 
 	nodes := cluster.ListNodes()
+	// TODO: move to shouldScale
 	offNodesCount := len(nodes.InClass(consts.OFF_CLASS))
 	if offNodesCount == 0 {
-		return
+		return nil
 	}
 
 	hs.planScalingConsideringMemoryResource(clusterMetrics, nodes)
 	hs.planScalingConsideringCpuResource(clusterMetrics, nodes)
+
+	return nil
 }
 
 // Plans scaling nodes considering their memory resource

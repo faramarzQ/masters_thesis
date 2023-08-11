@@ -32,7 +32,7 @@ func (rs *RandomScaler) shouldScale(clusterMetrics cluster.ClusterMetrics) bool 
 	return randNum > 50
 }
 
-func (rs *RandomScaler) planScaling(clusterMetrics cluster.ClusterMetrics) {
+func (rs *RandomScaler) planScaling(clusterMetrics cluster.ClusterMetrics) error {
 	klog.Info(consts.MSG_RUNNING_SCALE_PLANNING)
 	defer klog.Info(consts.MSG_FINISHED_SCALE_PLANNING)
 
@@ -43,9 +43,10 @@ func (rs *RandomScaler) planScaling(clusterMetrics cluster.ClusterMetrics) {
 	nodeTransition.from = consts.OFF_CLASS
 	nodeTransition.to = consts.IDLE_CLASS
 
+	// TODO: move to shouldScale
 	offNodesCount := float64(len(nodes.InClass(consts.OFF_CLASS)))
 	if offNodesCount == 0 {
-		return
+		return nil
 	}
 
 	numberOfNodesToTransit := int64(math.Ceil(offNodesCount * percentOfNodesToTransit))
@@ -53,4 +54,6 @@ func (rs *RandomScaler) planScaling(clusterMetrics cluster.ClusterMetrics) {
 	rs.setTransitions(nodeTransition)
 
 	klog.Info("Number of nodes to scale: " + strconv.Itoa(len(nodeTransition.nodesList)))
+
+	return nil
 }

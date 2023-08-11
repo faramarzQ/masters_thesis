@@ -31,7 +31,7 @@ func (rs *ProposedScaler) getName() string {
 }
 
 // TODO: return error
-func (ps *ProposedScaler) planScaling(clusterMetrics cluster.ClusterMetrics) {
+func (ps *ProposedScaler) planScaling(clusterMetrics cluster.ClusterMetrics) error {
 	klog.Info(consts.MSG_RUNNING_SCALE_PLANNING)
 	defer klog.Info(consts.MSG_FINISHED_SCALE_PLANNING)
 
@@ -48,13 +48,13 @@ func (ps *ProposedScaler) planScaling(clusterMetrics cluster.ClusterMetrics) {
 
 	payload, err := json.Marshal(clusterStatus)
 	if err != nil {
-		klog.Fatal(err)
+		return err
 	}
 
 	response, err := http.Post(os.Getenv("AI_SERVER_URL"), "application/json",
 		bytes.NewBuffer(payload))
 	if err != nil {
-		klog.Fatal(err)
+		return err
 	}
 
 	var responseMap map[string]interface{}
@@ -67,6 +67,8 @@ func (ps *ProposedScaler) planScaling(clusterMetrics cluster.ClusterMetrics) {
 	)
 
 	ps.ScaleNodesBetweenOffAndIdleClasses(int8(responseMap["action"].(float64)))
+
+	return nil
 }
 
 func (ps *ProposedScaler) ScaleNodesBetweenOffAndIdleClasses(numberOfNodesToScale int8) {
@@ -133,4 +135,10 @@ func (ps *ProposedScaler) ScaleNodesFromIdleToOffClass(numberOfNodesToScale int8
 		nodeTransition.nodesList = selectedNodes
 		ps.setTransitions(nodeTransition)
 	}
+}
+
+func (ps ProposedScaler) onFail(err error) {
+	klog.Info(consts.MSG_FAILED_PLANNING)
+	klog.Error(err)
+	repository.DeleteScalingExecutionLog(&scalerExecutionLog)
 }

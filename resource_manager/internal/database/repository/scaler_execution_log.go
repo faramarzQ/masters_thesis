@@ -40,3 +40,12 @@ func GetPreviousScalerExecutionLog(scalerName string) *model.ScalerExecutionLog 
 
 	return log
 }
+
+// Deletes scaling log record with it's dependencies
+func DeleteScalingExecutionLog(scalerExecutionLog *model.ScalerExecutionLog) {
+	for _, transition := range (*scalerExecutionLog).ScalingLog {
+		database.DBConn.Unscoped().Delete(transition)
+	}
+	database.DBConn.Unscoped().Delete((*scalerExecutionLog).ScalerExecutionLogDetails)
+	database.DBConn.Unscoped().Delete(&scalerExecutionLog)
+}
