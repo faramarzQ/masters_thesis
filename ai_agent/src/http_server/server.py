@@ -25,7 +25,7 @@ class requestHandler(BaseHTTPRequestHandler):
         body = self.readBody()
         print("----- REQUEST ----- \n", body)
 
-        response = Test(body)
+        response = runReinforcementLearning(body)
 
         responseString = json.dumps(response)
         print("----- RESPONSE ----- \n", responseString)

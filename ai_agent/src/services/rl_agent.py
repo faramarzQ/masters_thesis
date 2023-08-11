@@ -3,7 +3,7 @@ import numpy as np
 import os.path
 from src.services.q_table import QTable
 
-def Test(body):
+def runReinforcementLearning(body):
     q_table = QTable(
         body['NodesCount'],
         body['NodesDispersion'],
