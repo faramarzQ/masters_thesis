@@ -4,9 +4,9 @@ clusters:
     certificate-authority: ./ca.crt
     extensions:
     - extension:
-        last-update: Fri, 10 Feb 2023 14:59:22 +0330
+        last-update: Thu, 07 Sep 2023 08:58:10 +0330
         provider: minikube.sigs.k8s.io
-        version: v1.29.0
+        version: v1.31.2
       name: cluster_info
     server: https://192.168.49.2:8443
   name: thesis-cluster
@@ -15,9 +15,9 @@ contexts:
     cluster: thesis-cluster
     extensions:
     - extension:
-        last-update: Fri, 10 Feb 2023 14:59:22 +0330
+        last-update: Thu, 07 Sep 2023 08:58:10 +0330
         provider: minikube.sigs.k8s.io
-        version: v1.29.0
+        version: v1.31.2
       name: context_info
     namespace: default
     user: thesis-cluster

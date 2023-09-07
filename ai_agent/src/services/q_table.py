@@ -21,9 +21,9 @@ class QTable:
         self.QTable = self.loadOrCreateTable()
 
         # Generate a string from nodes dispersion in classes 
-        # {'active': 0, 'idle': 1, 'off': 2} => "2-1-0"
+        # {'active': 0, 'idle': 1, 'off': 2} => "0-1-2"
         self.currentState = ""
-        for className, count in reversed(nodesDispersion.items()):
+        for className, count in nodesDispersion.items():
             self.currentState += str(count) + "-"
         self.currentState = self.currentState[:-1]
         logging.info("Current state: %s", self.currentState)

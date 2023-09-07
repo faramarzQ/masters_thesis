@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -24,15 +23,10 @@ var (
 		Name: "requests_total",
 		Help: "Number of all requests.",
 	})
-	responseTime = prometheus.NewSummary(prometheus.SummaryOpts{
-		Name: "response_time",
-		Help: "Response time in seconds.",
-	})
 )
 
 func init() {
 	prometheus.MustRegister(requests)
-	prometheus.MustRegister(responseTime)
 }
 
 func main() {
@@ -57,15 +51,6 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	requests.Inc()
 
-	// requestTimeoutSeconds, err := strconv.Atoi(os.Getenv("REQUEST_TIMEOUT_SECONDS"))
-	// if err != nil {
-	// 	klog.Fatal(err)
-	// }
-	// ctx, cancel := context.WithTimeout(context.Background(), time.Duration(time.Second*time.Duration(requestTimeoutSeconds)))
-	// defer cancel()
-
-	start := time.Now()
-
 	ctx := context.Background()
 	fibonacciHost := string(os.Getenv("FIBONACCI_NODEPORT_SERVICE_HOST"))
 	fibonacciPort := os.Getenv("FIBONACCI_NODEPORT_SERVICE_PORT")
@@ -74,9 +59,6 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		klog.Fatal("Error building http request with context: %s\n", err)
 	}
-
-	duration := time.Since(start)
-	responseTime.Observe(duration.Seconds())
 
 	client := &http.Client{}
 	res, err := client.Do(req)

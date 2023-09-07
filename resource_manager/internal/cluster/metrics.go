@@ -66,6 +66,7 @@ func GetClusterStatus() ClusterStatus {
 	}
 
 	gamma, err := strconv.ParseFloat(os.Getenv("RL_GAMMA_VALUE"), 32)
+	gamma = math.Floor(gamma*100) / 100
 	if err != nil {
 		klog.Fatal(err)
 	}
