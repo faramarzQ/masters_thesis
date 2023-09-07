@@ -4,6 +4,7 @@ metadata:
   name: prometheus-clusterip
   labels:
     app: prometheus-clusterip
+  namespace: monitoring
 spec:
   ports:
   - port: 9090

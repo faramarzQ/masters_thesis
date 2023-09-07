@@ -4,6 +4,7 @@ metadata:
   labels:
     app: node-exporter
   name: node-exporter
+  namespace: monitoring
 spec:
   selector:
     matchLabels:
@@ -26,7 +27,7 @@ spec:
         - --collector.filesystem.ignored-mount-points=^/(dev|proc|sys|var/lib/docker/.+|var/lib/kubelet/pods/.+)($|/)
         - --collector.netclass.ignored-devices=^(veth.*)$
         name: node-exporter
-        image: quay.io/prometheus/node-exporter:v1.6.0
+        image: "prom/node-exporter@sha256:4dc469c325388dee18dd0a9e53ea30194abed43abc6330d4ffd6d451727ba3e6"
         ports:
           - containerPort: 9100
             protocol: TCP

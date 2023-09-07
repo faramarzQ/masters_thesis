@@ -4,6 +4,7 @@ metadata:
   name: prometheus
   labels:
     app: prometheus
+  namespace: monitoring
 spec:
   replicas: 1
   selector:
@@ -39,7 +40,7 @@ spec:
               cpu: 500m
               memory: 500M
             limits:
-              cpu: 1
+              cpu: "1"
               memory: 1Gi
           volumeMounts:
             - name: prometheus-volume

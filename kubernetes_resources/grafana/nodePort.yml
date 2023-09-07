@@ -4,6 +4,7 @@ metadata:
   name: grafana-nodeport
   labels:
     app: grafana-nodeport
+  namespace: monitoring
 spec:
   ports:
   - port: 3000
