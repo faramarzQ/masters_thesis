@@ -5,7 +5,7 @@ metadata:
   labels:
     app: fibonacci
 spec:
-  replicas: 1
+  # replicas: 1
   selector:
     matchLabels:
       app: fibonacci
@@ -28,3 +28,5 @@ spec:
         resources:
           limits:
             cpu: "500m"
+          requests:
+            cpu: 500m

@@ -5,7 +5,7 @@ metadata:
   labels:
     app: gateway
 spec:
-  replicas: 1
+  # replicas: 1
   selector:
     matchLabels:
       app: gateway
@@ -22,6 +22,6 @@ spec:
         gateway: "true"
       containers:
       - name: gateway
-        image: gateway:0.6
+        image: gateway:0.9
         ports:
         - containerPort: 4444
