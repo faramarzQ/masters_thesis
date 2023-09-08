@@ -4,7 +4,6 @@ metadata:
   name: prometheus-nodeport
   labels:
     app: prometheus-nodeport
-  namespace: monitoring
 spec:
   ports:
   - port: 9090
@@ -13,3 +12,4 @@ spec:
   selector:
     app: prometheus
   type: NodePort 
+  

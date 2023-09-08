@@ -4,7 +4,6 @@ metadata:
   name: prometheus
   labels:
     app: prometheus
-  namespace: monitoring
 spec:
   replicas: 1
   selector:
