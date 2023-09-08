@@ -1,0 +1,30 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: silencer-scaler
+spec:
+  schedule: "*/10 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          nodeSelector:
+            minikube.k8s.io/primary: "true"
+          containers:
+          - name: resource-manager
+            image: resource_manager:0.426
+            command: ["make", "run-silencer-scaler-bin"]
+            env:
+              - name: LOG_TO_CONSOLE
+                value: "false"
+              - name: LOG_FILE_DIR
+                value: "/app/storage/logs.log"
+            volumeMounts:
+              - mountPath: "/app/storage"
+                name: resource-manager-volume
+          volumes:
+            - name: resource-manager-volume
+              hostPath:
+                path: /pod_volumes/resource_manager
+                type: Directory
+          restartPolicy: OnFailure

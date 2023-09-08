@@ -8,6 +8,7 @@ import (
 	"resource_manager/internal/logger"
 	"resource_manager/internal/prometheus"
 	"resource_manager/internal/scaler"
+	"time"
 
 	"k8s.io/klog"
 )
@@ -26,6 +27,8 @@ func main() {
 
 	klog.Info(consts.MSG_SCALER_APP_FINISHED)
 	klog.Flush()
+
+	time.Sleep(120 * time.Second)
 
 	os.Exit(0)
 }

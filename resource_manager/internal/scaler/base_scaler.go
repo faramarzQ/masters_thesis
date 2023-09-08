@@ -2,6 +2,7 @@ package scaler
 
 import (
 	"resource_manager/internal/cluster"
+	"resource_manager/internal/config"
 	"resource_manager/internal/consts"
 	"resource_manager/internal/database/model"
 	"resource_manager/internal/database/repository"
@@ -37,6 +38,8 @@ func (bs *baseScaler) onFail(err error) {}
 func (bs *baseScaler) prePlan() {
 	klog.Info(consts.MSG_RUNNING_PRE_PLANNING)
 	defer klog.Info(consts.MSG_FINISHED_PRE_PLANNING)
+
+	cluster.MasterNode().SetAnnotation(consts.ACTIVE_SCALER_LABEL_NAME, config.ACTIVE_SCALER)
 
 	// Fetch previous execution log
 	previousScalerExecutionLog = repository.GetPreviousScalerExecutionLog(consts.ACTIVE_SCALER_LABEL_NAME)

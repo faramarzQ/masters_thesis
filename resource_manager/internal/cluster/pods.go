@@ -98,7 +98,7 @@ func (p *Pod) IsAlreadyWarm() bool {
 	return isWarm == "true"
 }
 
-// Removed warm label from the pod
+// Set warm label as false
 func (p *Pod) UnsetWarm() {
 	labelPatch := fmt.Sprintf(`[{"op":"add","path":"/metadata/labels/%s","value":"%s" }]`, consts.POD_WARM_LABEL_NAME, "false")
 	_, err := Clientset.CoreV1().Pods(config.CLUSTER_NAMESPACE).Patch(context.Background(), p.Name, types.JSONPatchType, []byte(labelPatch), metav1.PatchOptions{})

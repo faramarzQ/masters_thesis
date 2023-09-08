@@ -3,6 +3,7 @@
 export ENV=DEV_LOCAL
 export CONFIG_DIR_DEV_LOCAL=../config/outcluster_auth/config.yml
 export CLUSTER_NAMESPACE=default
+export LOG_FILE_DIR=storage/logs.log
 
 # Database
 export DB_HOST=$DATABASE_NODEPORT_SERVICE_HOST
@@ -18,4 +19,3 @@ export ENERGY_CONSUMPTION_WEIGHT=3
 
 # Prometheus
 export PROMETHEUS_URL=http://$PROMETHEUS_NODEPORT_SERVICE_HOST:$PROMETHEUS_NODEPORT_SERVICE_PORT
-

@@ -20,6 +20,7 @@ SCHEDULER_DEFAULT_FLAGS=--authentication-kubeconfig=/etc/kubernetes/scheduler.co
 #
 
 # On local
+
 run-random-scaler:
 	cd $(SCRIPTS_DIR) && . ./$(ENV_LOCAL) \
 	&& cd $(PROJECT_ROOT) && APP=scaler APP_ID=1 go run $(SCALER_ENTRY) $(flags)
@@ -35,6 +36,11 @@ run-heuristic-scaler:
 run-proposed-scaler:
 	cd $(SCRIPTS_DIR) && . ./$(ENV_LOCAL) \
 	&& cd $(PROJECT_ROOT) && APP=scaler APP_ID=4 go run $(SCALER_ENTRY) $(flags)
+
+run-silencer-scaler:
+	cd $(SCRIPTS_DIR) && . ./$(ENV_LOCAL) \
+	&& cd $(PROJECT_ROOT) && APP=scaler APP_ID=5 go run $(SCALER_ENTRY) $(flags)
+
 
 # On Minikube
 
@@ -57,8 +63,13 @@ run-proposed-scaler-bin:
 	cd $(SCRIPTS_DIR) && . ./$(ENV_MINIKUBE_BIN) \
 	&& cd $(BIN_DIR) && APP=scaler APP_ID=4 ./scaler $(flags)
 
+run-silencer-scaler-bin:
+	cd $(SCRIPTS_DIR) && . ./$(ENV_MINIKUBE_BIN) \
+	&& cd $(BIN_DIR) && APP=scaler APP_ID=5 ./scaler $(flags)
 
+#
 # Scheduler
+#
 
 run-random-scheduler:
 	cd $(SCRIPTS_DIR) && . ./$(ENV_LOCAL) \
@@ -70,16 +81,3 @@ build-scheduler:
 run-random-scheduler-bin:
 	cd $(SCRIPTS_DIR) && . ./$(ENV_MINIKUBE_BIN) \
 	&& cd $(BIN_DIR) && APP=scheduler APP_ID=1 ./scheduler $(SCHEDULER_DEFAULT_FLAGS) $(flags)
-
-# Silencer
-
-# run-random-scaler:
-# 	cd $(SCRIPTS_DIR) && . ./$(ENV_LOCAL) \
-# 	&& APP=scaler APP_ID=1 go run $(SCALER_ENTRY) $(flags)
-
-build-silencer:
-		go build -o $(SILENCER_OUTPUT) $(SILENCER_ENTRY) $(flags)
-
-run-silencer:
-	cd $(SCRIPTS_DIR) && . ./$(ENV_MINIKUBE_BIN) \
-	&& cd $(BIN_DIR) && ./silencer $(flags)

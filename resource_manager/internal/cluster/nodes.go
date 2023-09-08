@@ -28,6 +28,7 @@ type Node struct {
 	v1.Node
 	Class                   consts.NODE_CLASS
 	IsMaster                bool
+	IsWorker                bool
 	Hostname                string
 	AllocatableCpu          string
 	AllocatableMemory       string
@@ -87,25 +88,31 @@ func (nl NodeList) TotalCpu() uint {
 }
 
 func BindNode(node v1.Node) Node {
-	totalCpu, _ := node.Status.Capacity.Cpu().AsInt64()
+	totalCpu, _ := node.Status.Capacity.Cpu().AsInt64() // ALERT: don't use this! use n.GetTotalCpuCores() instead.
 	totalMemory, _ := node.Status.Capacity.Memory().AsInt64()
 	var class consts.NODE_CLASS = consts.NODE_CLASS(node.Labels[consts.NODE_CLASS_LABEL_NAME])
-	isMaster, err := strconv.ParseBool(node.Labels[consts.NODE_IS_PRIMARY_LABEL_NAME])
+	isMaster, _ := strconv.ParseBool(node.Labels[consts.NODE_IS_PRIMARY_LABEL_NAME])
+	isWorker, _ := strconv.ParseBool(node.Labels[consts.WORKER_NODE_LABEL_NAME])
 
-	maxPowerConsumption, err := strconv.Atoi(node.Annotations[consts.MAX_POWER_CONSUMPTION_LABEL_NAME])
-	if err != nil {
-		klog.Fatal(err)
-	}
+	var maxPowerConsumption, minPowerConsumption int
+	var err error
+	if isWorker {
+		maxPowerConsumption, err = strconv.Atoi(node.Annotations[consts.MAX_POWER_CONSUMPTION_LABEL_NAME])
+		if err != nil {
+			klog.Fatal(err)
+		}
 
-	minPowerConsumption, err := strconv.Atoi(node.Annotations[consts.MIN_POWER_CONSUMPTION_LABEL_NAME])
-	if err != nil {
-		klog.Fatal(err)
+		minPowerConsumption, err = strconv.Atoi(node.Annotations[consts.MIN_POWER_CONSUMPTION_LABEL_NAME])
+		if err != nil {
+			klog.Fatal(err)
+		}
 	}
 
 	newNode := Node{
 		node,
 		class,
 		isMaster,
+		isWorker,
 		node.ObjectMeta.Name,
 		node.Status.Allocatable.Cpu().String(),
 		node.Status.Allocatable.Memory().String(),
@@ -154,7 +161,6 @@ func (n *Node) SetAnnotation(key, value string) {
 	annotations := n.Annotations
 	annotations[key] = value
 	n.SetAnnotations(annotations)
-	fmt.Println(n.Name)
 	newNode, err := Clientset.CoreV1().Nodes().Update(context.TODO(), &n.Node, metav1.UpdateOptions{})
 	if err != nil {
 		panic(err)
@@ -196,6 +202,7 @@ func (n *Node) GetScaledAt() time.Time {
 func (n Node) ListPods() PodList {
 	pods, err := Clientset.CoreV1().Pods(config.CLUSTER_NAMESPACE).List(context.Background(), metav1.ListOptions{
 		FieldSelector: "spec.nodeName=" + n.Name,
+		LabelSelector: "app=fibonacci",
 	})
 	if err != nil {
 		panic(err)
@@ -229,18 +236,14 @@ func (n Node) GetMemoryUtilization() float64 {
 
 // Calculate node's cpu utilization
 func (n Node) GetCpuUtilization() float64 {
-	totalCpu := n.TotalCpu
-	var usedCpu int64
-
-	for _, pod := range n.ListPods() {
-		podMetrics := pod.GetMetrics()
-		for _, container := range podMetrics.Containers {
-			containerCpuUsage, _ := container.Usage.Cpu().AsInt64()
-			usedCpu += containerCpuUsage
-		}
+	totalCpu := n.GetTotalCpuCores()
+	usedCpu, err := n.GetUsedCpuCoresAtGiveTime(time.Now())
+	if err != nil {
+		klog.Fatal(usedCpu)
 	}
+
 	cpuUtilization := (float64(usedCpu) / float64(totalCpu)) * 100
-	cpuUtilizationRounded := math.Floor(cpuUtilization*10000) / 10000
+	cpuUtilizationRounded := math.Floor(cpuUtilization*1) / 1
 
 	return cpuUtilizationRounded
 }

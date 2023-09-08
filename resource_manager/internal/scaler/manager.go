@@ -20,8 +20,8 @@ func NewScalerManager() *ScalerManager {
 		NewRandomScaler(),
 		NewFixedScaler(),
 		NewHeuristicScaler(),
-		// NewSilencerScaler(),
 		NewProposedScaler(),
+		NewSilencerScaler(),
 	)
 
 	return scalerManager
@@ -54,11 +54,5 @@ func (sm ScalerManager) Run() {
 			sm.Scaler.onFail(err)
 		}
 		sm.Scaler.scale()
-		// sm.postScale()
 	}
-}
-
-func (sm ScalerManager) postScale() {
-	// store executed scaler's name in the cluster
-	cluster.MasterNode().SetAnnotation(consts.ACTIVE_SCALER_LABEL_NAME, sm.Scaler.getName())
 }

@@ -15,6 +15,6 @@ COPY go.mod go.sum ./
 COPY . ./
 
 # Build 
-RUN CGO_ENABLED=0 GOOS=linux go build -o /bin/scaler ./cmd/scaler/main.go
+RUN make build-scaler
 
 cmd ["sleep", "500"]
