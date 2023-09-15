@@ -1,6 +1,8 @@
 package scaler
 
 import (
+	"math"
+	"os"
 	"resource_manager/internal/cluster"
 	"resource_manager/internal/consts"
 	"strconv"
@@ -27,10 +29,19 @@ func (fs *FixedScaler) shouldScale(clusterMetrics cluster.ClusterMetrics) bool {
 	defer klog.Info(consts.MSG_FINISHED_SHOULD_SCALE)
 
 	nodes := cluster.ListNodes()
-
+	fixedNodesCount, _ := strconv.Atoi(os.Getenv("FIXED_IDLE_NODES_COUNT"))
 	idleNodesCount := len(nodes.InClass(consts.IDLE_CLASS))
-	if idleNodesCount < consts.FIXED_IDLE_NODES_COUNT {
+
+	klog.Info("Desired idle nodes: ", fixedNodesCount)
+	klog.Info("Idle nodes: ", idleNodesCount)
+
+	if idleNodesCount < fixedNodesCount {
 		return true
+	}
+
+	offNodesCount := float64(len(nodes.InClass(consts.OFF_CLASS)))
+	if offNodesCount == 0 {
+		return false
 	}
 
 	return false
@@ -44,18 +55,15 @@ func (fs *FixedScaler) planScaling(cluster.ClusterMetrics) error {
 
 	nodes := cluster.ListNodes()
 
-	// TODO: move to shouldScale
-	offNodesCount := float64(len(nodes.InClass(consts.OFF_CLASS)))
-	if offNodesCount == 0 {
-		return nil
-	}
-
 	var nodeTransition nodeTransition
 	nodeTransition.from = consts.OFF_CLASS
 	nodeTransition.to = consts.IDLE_CLASS
 
+	offNodesCount := float64(len(nodes.InClass(consts.OFF_CLASS)))
+
+	fixedNodesCount, _ := strconv.Atoi(os.Getenv("FIXED_IDLE_NODES_COUNT"))
 	idleNodesCount := len(nodes.InClass(consts.IDLE_CLASS))
-	numberOfNodesToTransit := int64(consts.FIXED_IDLE_NODES_COUNT - idleNodesCount)
+	numberOfNodesToTransit := int64(math.Min(float64(fixedNodesCount-idleNodesCount), offNodesCount))
 	nodeTransition.nodesList = cluster.GetRandomNodesFromNodeList(nodes.InClass(consts.OFF_CLASS), numberOfNodesToTransit)
 	fs.setTransitions(nodeTransition)
 

@@ -1,0 +1,37 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: fixed-scaler
+spec:
+  schedule: "*/10 * * *  *"
+  successfulJobsHistoryLimit: 0
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: fixed-scaler
+        spec:
+          volumes:
+            - name: fixed-scaler-volume
+              hostPath:
+                path: /pod_volumes/resource_manager
+                type: Directory
+          nodeSelector:
+            minikube.k8s.io/primary: "true"
+          containers:
+          - name: resource-manager
+            image: resource_manager:0.438
+            command: ["make", "run-fixed-scaler-bin"]
+            env:
+              - name: FIXED_IDLE_NODES_COUNT
+                value: "2"
+              - name: LOG_TO_CONSOLE
+                value: "false"
+              - name: LOG_FILE_DIR
+                value: "/app/storage/fixed_scaler_logs.log"
+            volumeMounts:
+              - name:  fixed-scaler-volume
+                mountPath: /app/storage
+          restartPolicy:  Never
