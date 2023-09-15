@@ -23,10 +23,16 @@ var (
 		Name: "requests_total",
 		Help: "Number of all requests.",
 	})
+
+	successRequests = prometheus.NewCounter(prometheus.CounterOpts{
+		Name: "success_requests_total",
+		Help: "Number of Success requests.",
+	})
 )
 
 func init() {
 	prometheus.MustRegister(requests)
+	prometheus.MustRegister(successRequests)
 }
 
 func main() {
@@ -63,13 +69,15 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	client := &http.Client{}
 	res, err := client.Do(req)
 	if err != nil {
-		klog.Fatal("Error making http request: %s\n", err)
+		klog.Error("Error making http request: %s\n", err)
 	}
 
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		klog.Fatal(err)
+		klog.Error(err)
 	}
+
+	successRequests.Inc()
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(body)
