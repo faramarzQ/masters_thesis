@@ -4,6 +4,8 @@ import (
 	"resource_manager/internal/database"
 	"resource_manager/internal/database/model"
 	"time"
+
+	"k8s.io/klog/v2"
 )
 
 // Inserts a scaler execution log record
@@ -31,10 +33,10 @@ func GetPreviousScalerExecutionLog(scalerName string) *model.ScalerExecutionLog 
 		// This join only retrieves logs which have details
 		Joins("join scaler_execution_log_details on scaler_execution_logs.id = scaler_execution_log_details.scaler_execution_log_id").
 		Preload("ScalerExecutionLogDetails").
-		Preload("ScalingLog").
 		Last(&log)
 
 	if tx.Error != nil {
+		klog.Error(tx.Error)
 		return nil
 	}
 

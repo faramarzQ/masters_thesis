@@ -18,6 +18,7 @@ class QTable:
         self.successRateWeight = successRateWeight
         self.alfa = alfa
         self.gamma = gamma
+        self.lastStepReward = 0
         self.QTable = self.loadOrCreateTable()
 
         # Generate a string from nodes dispersion in classes 
@@ -63,6 +64,7 @@ class QTable:
         # Calculate reward
         reward = ( self.successRateWeight * SuccessRequestRate ) - ( self.energyConsumptionWeight * clusterEnergyConsumption )
         logging.info("Reward: %s", reward)
+        self.lastStepReward = reward
 
         # self.QTable[self.state][self.actionTaken] += self.alpha * (reward + self.gamma * np.max(Q[self.state]) - Q[self.previousState][previousActionTaken])
         bestQValue = 0
@@ -80,7 +82,7 @@ class QTable:
         """
         actions = self.QTable[self.currentState]
 
-        if random.randrange(1,100) > self.epsilon:
+        if random.randrange(1,100) > self.epsilon*100:
             # Take greedy action most of the time
             selectedAction = 0
             bestValue = 0
@@ -122,3 +124,9 @@ class QTable:
     def generateNewEpsilonValue(self, step, minimumEpsilonValue, maximumEpsilonValue, EDR):
         self.epsilon = minimumEpsilonValue + (maximumEpsilonValue - minimumEpsilonValue) * math.pow(math.e, (-EDR * step))
         logging.info("New epsilon:  %s", self.epsilon)
+
+    def getEpsilonValue(self):
+        return self.epsilon
+
+    def getLastStepReward(self):
+        return self.lastStepReward

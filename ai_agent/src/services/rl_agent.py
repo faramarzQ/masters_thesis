@@ -25,4 +25,9 @@ def runReinforcementLearning(body):
 
     q_table.persistQTable()
 
-    return {"state": currentState, "action": action}
+    return {
+        "state": currentState,
+        "action": action,
+        "epsilon": q_table.getEpsilonValue(),
+        "lastStepReward": q_table.getLastStepReward()
+    }

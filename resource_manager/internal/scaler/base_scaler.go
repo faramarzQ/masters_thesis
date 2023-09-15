@@ -42,11 +42,11 @@ func (bs *baseScaler) prePlan() {
 	cluster.MasterNode().SetAnnotation(consts.ACTIVE_SCALER_LABEL_NAME, config.ACTIVE_SCALER)
 
 	// Fetch previous execution log
-	previousScalerExecutionLog = repository.GetPreviousScalerExecutionLog(consts.ACTIVE_SCALER_LABEL_NAME)
+	previousScalerExecutionLog = repository.GetPreviousScalerExecutionLog(config.ACTIVE_SCALER)
 
 	// Log execution
 	var err error
-	scalerExecutionLog, err = repository.InsertScalerExecutionLog(previousScalerExecutionLog, consts.ACTIVE_SCALER_LABEL_NAME)
+	scalerExecutionLog, err = repository.InsertScalerExecutionLog(previousScalerExecutionLog, config.ACTIVE_SCALER)
 	if err != nil {
 		klog.Fatal(err)
 	}
@@ -60,11 +60,18 @@ func (bs *baseScaler) scale() {
 		toClass := bs.nodeTransitions[i].to
 		for j := 0; j < len(bs.nodeTransitions[i].nodesList); j++ {
 			node := bs.nodeTransitions[i].nodesList[j]
-
 			node.SetClass(toClass)
 			// repository.InsertScalingLog(scalerExecutionLog, node.Name, toClass)
 
 			klog.Info("Transitioned \"" + node.Name + "\" From \"" + string(bs.nodeTransitions[i].from) + "\" To \"" + string(toClass) + "\"")
+		}
+
+		// Only active nodes should have a function
+		if toClass != consts.ACTIVE_CLASS {
+			for j := 0; j < len(bs.nodeTransitions[i].nodesList); j++ {
+				node := bs.nodeTransitions[i].nodesList[j]
+				node.RemovePods()
+			}
 		}
 	}
 }
