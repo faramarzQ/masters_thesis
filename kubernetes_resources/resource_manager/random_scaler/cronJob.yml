@@ -1,9 +1,9 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: silencer-scaler
+  name: random-scaler
 spec:
-  schedule: "*/10 * * * *"
+  schedule: "*/10 * * *  *"
   successfulJobsHistoryLimit: 0
   failedJobsHistoryLimit: 3
   jobTemplate:
@@ -11,24 +11,24 @@ spec:
       template:
         metadata:
           labels:
-            app: silencer-scaler
+            app: random-scaler
         spec:
           nodeSelector:
             minikube.k8s.io/primary: "true"
           containers:
           - name: resource-manager
-            image: resource_manager:0.436
-            command: ["make", "run-silencer-scaler-bin"]
+            image: resource_manager:0.438
+            command: ["make", "run-random-scaler-bin"]
             env:
               - name: LOG_TO_CONSOLE
                 value: "false"
               - name: LOG_FILE_DIR
-                value: "/app/storage/logs.log"
+                value: "/app/storage/random_scaler_logs.log"
             volumeMounts:
-              - mountPath: "/app/storage"
-                name: resource-manager-volume
+              - name:  random-scaler-volume
+                mountPath: /app/storage
           volumes:
-            - name: resource-manager-volume
+            - name: random-scaler-volume
               hostPath:
                 path: /pod_volumes/resource_manager
                 type: Directory

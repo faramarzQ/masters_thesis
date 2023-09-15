@@ -22,6 +22,6 @@ spec:
         gateway: "true"
       containers:
       - name: gateway
-        image: gateway:0.9
+        image: gateway:0.91
         ports:
         - containerPort: 4444

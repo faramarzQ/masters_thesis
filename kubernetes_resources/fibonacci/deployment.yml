@@ -20,6 +20,7 @@ spec:
     spec:
       nodeSelector:
         worker: "true"
+        class: "active"
       containers:
       - name: fibonacci
         image: fibonacci:0.2

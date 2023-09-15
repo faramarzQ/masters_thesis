@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: silencer-scaler
+  name: proposed-scaler
 spec:
   schedule: "*/10 * * * *"
   successfulJobsHistoryLimit: 0
@@ -11,19 +11,33 @@ spec:
       template:
         metadata:
           labels:
-            app: silencer-scaler
+            app: proposed-scaler
         spec:
           nodeSelector:
             minikube.k8s.io/primary: "true"
           containers:
           - name: resource-manager
-            image: resource_manager:0.436
-            command: ["make", "run-silencer-scaler-bin"]
+            image: resource_manager:0.437
+            command: ["make", "run-proposed-scaler-bin"]
             env:
               - name: LOG_TO_CONSOLE
                 value: "false"
               - name: LOG_FILE_DIR
-                value: "/app/storage/logs.log"
+                value: "/app/storage/proposed_scaler_logs.log"
+              - name: RL_SUCCESS_RATE_WEIGHT
+                value: "2"
+              - name: RL_ENERGY_CONSUMPTION_WEIGHT
+                value: "3"
+              - name: RL_ALFA_VALUE
+                value: "0.5"
+              - name: RL_GAMMA_VALUE
+                value: "0.6"
+              - name: RL_MAXIMUM_EPSILON_VALUE
+                value: "0.8"
+              - name: RL_MINIMUM_EPSILON_VALUE
+                value: "0.05"
+              - name: RL_EDR
+                value: "0.02"
             volumeMounts:
               - mountPath: "/app/storage"
                 name: resource-manager-volume

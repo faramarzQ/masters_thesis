@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: monitoring-server
+  labels:
+    app: monitoring-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: monitoring-server
+  template:
+    metadata:
+      labels:
+        app: monitoring-server
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/path: '/metrics'
+        prometheus.io/port: '5555'
+    spec:
+      containers:
+      - name: monitoring-server
+        image: monitoring_server:0.2
+        ports:
+        - containerPort: 5555
+      nodeSelector:
+        minikube.k8s.io/primary: "true"
