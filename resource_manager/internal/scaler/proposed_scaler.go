@@ -11,6 +11,7 @@ import (
 	"resource_manager/internal/cluster"
 	"resource_manager/internal/consts"
 	"resource_manager/internal/database/repository"
+	monitoringClient "resource_manager/internal/monitoring_client"
 
 	"k8s.io/klog"
 )
@@ -66,6 +67,10 @@ func (ps *ProposedScaler) planScaling(clusterMetrics cluster.ClusterMetrics) err
 
 	var responseMap map[string]interface{}
 	json.NewDecoder(response.Body).Decode(&responseMap)
+
+	monitoringClient.SetEpsilonValue(float64(responseMap["epsilon"].(float64)))
+	monitoringClient.SetEnergyConsumptionValue(clusterStatus.ClusterEnergyConsumption)
+	monitoringClient.SetRewardValue(float64(responseMap["lastStepReward"].(float64)))
 
 	repository.InsertScalerExecutionLogDetail(
 		scalerExecutionLog,

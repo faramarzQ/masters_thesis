@@ -199,6 +199,14 @@ func (n *Node) GetScaledAt() time.Time {
 	return date
 }
 
+func (n *Node) RemovePods() {
+	pods := n.ListPods()
+
+	for _, pod := range pods {
+		Clientset.CoreV1().Pods(config.CLUSTER_NAMESPACE).Delete(context.Background(), pod.Name, metav1.DeleteOptions{})
+	}
+}
+
 func (n Node) ListPods() PodList {
 	pods, err := Clientset.CoreV1().Pods(config.CLUSTER_NAMESPACE).List(context.Background(), metav1.ListOptions{
 		FieldSelector: "spec.nodeName=" + n.Name,

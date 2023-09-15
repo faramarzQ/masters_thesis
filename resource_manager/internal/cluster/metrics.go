@@ -46,16 +46,19 @@ type ClusterStatus struct {
 
 func GetClusterStatus() ClusterStatus {
 	minimumEpsilonValue, err := strconv.ParseFloat(os.Getenv("RL_MINIMUM_EPSILON_VALUE"), 32)
+	minimumEpsilonValue = math.Floor(minimumEpsilonValue*100) / 100
 	if err != nil {
 		klog.Fatal(err)
 	}
 
 	maximumEpsilonValue, err := strconv.ParseFloat(os.Getenv("RL_MAXIMUM_EPSILON_VALUE"), 32)
+	maximumEpsilonValue = math.Floor(maximumEpsilonValue*100) / 100
 	if err != nil {
 		klog.Fatal(err)
 	}
 
 	edr, err := strconv.ParseFloat(os.Getenv("RL_EDR"), 32)
+	edr = math.Floor(edr*100) / 100
 	if err != nil {
 		klog.Fatal(err)
 	}
@@ -147,7 +150,7 @@ func getSuccessfulRequests() int {
 	return successfulRequests
 }
 
-// Returns tot
+// Returns total number of requests
 func getTotalRequests() int {
 	period, _ := strconv.Atoi(os.Getenv("PROMETHEUS_REQUESTS_PERIOD_MINUTE"))
 	time := time.Now().Add(time.Duration(period) * time.Minute)
@@ -165,7 +168,7 @@ func GetSuccessRequestRate() float64 {
 	if totalRequests == 0 {
 		return 0
 	}
-	return float64(getSuccessfulRequests()) / float64(getTotalRequests())
+	return float64(getSuccessfulRequests()) / float64(totalRequests)
 }
 
 // Calculates energy consumption of every node during the last scaling period
@@ -210,6 +213,10 @@ func CalculateEnergyConsumption(previousScalerExecutionLog databaseModels.Scaler
 
 		energyConsumption += energyConsumptionOfNode
 		maxEnergyConsumption += maxEnergyConsumptionOfNode
+	}
+
+	if energyConsumption == 0 {
+		return 0
 	}
 
 	return energyConsumption / maxEnergyConsumption
