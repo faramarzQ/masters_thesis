@@ -24,6 +24,10 @@ spec:
                 value: "false"
               - name: LOG_FILE_DIR
                 value: "/app/storage/logs.log"
+              - name: WARM_POD_DURATION_MINUTES
+                value: "1"
+              - name: IDLE_NODE_DURATION_MINUTES
+                value: "10"
             volumeMounts:
               - mountPath: "/app/storage"
                 name: resource-manager-volume

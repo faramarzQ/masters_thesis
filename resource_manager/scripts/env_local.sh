@@ -30,7 +30,7 @@ export RL_MAXIMUM_EPSILON_VALUE=0.99
 export RL_MINIMUM_EPSILON_VALUE=0.05
 export RL_EDR=0.02
 
-#  Fixed scaler
+# Fixed scaler
 export FIXED_IDLE_NODES_COUNT=2
 
 # Monitoring server
@@ -40,3 +40,7 @@ export MONITORING_SERVER_URL=http://192.168.49.2:32000/
 # Heuristic scaler
 export HEURISTIC_SCALER_UPPER_CPU_THRESHOLD=70
 export HEURISTIC_SCALER_DESIRED_CPU_UTIL=60
+
+# Silencer scaler
+export WARM_POD_DURATION_MINUTES=1
+export IDLE_NODE_DURATION_MINUTES=10

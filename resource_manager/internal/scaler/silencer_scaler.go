@@ -1,6 +1,8 @@
 package scaler
 
 import (
+	"os"
+	"strconv"
 	"time"
 
 	"resource_manager/internal/cluster"
@@ -25,14 +27,21 @@ func (rs *SilencerScaler) planScaling(clusterMetrics cluster.ClusterMetrics) err
 	klog.Info(consts.MSG_RUNNING_SCALE_PLANNING)
 	defer klog.Info(consts.MSG_FINISHED_SCALE_PLANNING)
 
-	rs.silenceActiveNodes()
-	rs.silenceIdleNodes()
+	err := rs.silenceActiveNodes()
+	if err != nil {
+		return err
+	}
+
+	err = rs.silenceIdleNodes()
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
 
 // For every active node, checks if it has been inactive for a while then silences them to lower level classes
-func (sc *SilencerScaler) silenceActiveNodes() {
+func (sc *SilencerScaler) silenceActiveNodes() error {
 	nodes := cluster.ListActiveNodes()
 
 	// For every scaler type, directly change nodes to off class,
@@ -69,11 +78,16 @@ func (sc *SilencerScaler) silenceActiveNodes() {
 		// If node only has one pod with no utilization
 		if node.GetCpuUtilization() == 0 {
 			pod := node.ListPods()[0]
+			warmPodDuration, err := strconv.Atoi(os.Getenv("WARM_POD_DURATION_MINUTES"))
+			if err != nil {
+				klog.Info("Failed parsing WARM_POD_DURATION_MINUTES variable")
+				return err
+			}
 
 			if pod.IsAlreadyWarm() {
 				// if has been warm for a while
 				warmedAt := pod.GetWarmedAt()
-				if warmedAt.Add(time.Minute*time.Duration(consts.WARM_POD_DURATION_MINUTES)).Unix() < time.Now().Unix() {
+				if warmedAt.Add(time.Minute*time.Duration(warmPodDuration)).Unix() < time.Now().Unix() {
 					nodesToTransit = append(nodesToTransit, node)
 					pod.UnsetWarm()
 					klog.Info("Unset warm label from ", pod.Name+" pod on "+node.Name+" node")
@@ -93,22 +107,30 @@ func (sc *SilencerScaler) silenceActiveNodes() {
 	nodeTransition.to = targetClass
 	nodeTransition.nodesList = nodesToTransit
 	sc.setTransitions(nodeTransition)
+
+	return nil
 }
 
 // For every idle node, checks if it has been idle for a while, then silences them to off class
-func (sc *SilencerScaler) silenceIdleNodes() {
+func (sc *SilencerScaler) silenceIdleNodes() error {
 	// Only available for the proposed scaler
 	activeScaler := cluster.MasterNode().Labels[consts.ACTIVE_SCALER_LABEL_NAME]
 	if activeScaler != consts.PROPOSED_SCALER {
-		return
+		return nil
 	}
 
 	nodes := cluster.ListNodes().InClass(consts.IDLE_CLASS)
+	idleNodeDuration, err := strconv.Atoi(os.Getenv("IDLE_NODE_DURATION_MINUTES"))
+	if err != nil {
+		klog.Info("Failed parsing IDLE_NODE_DURATION_MINUTES variable")
+		return err
+	}
+
 	var nodesToTransit cluster.NodeList
 	for _, node := range nodes {
 		// if node has been idle for a specific time, scale to off
 		scaledAt := node.GetScaledAt()
-		if scaledAt.Add(time.Minute*time.Duration(consts.IDLE_NODE_DURATION_MINUTES)).Unix() < time.Now().Unix() {
+		if scaledAt.Add(time.Minute*time.Duration(idleNodeDuration)).Unix() < time.Now().Unix() {
 			nodesToTransit = append(nodesToTransit, node)
 		}
 	}
@@ -118,4 +140,6 @@ func (sc *SilencerScaler) silenceIdleNodes() {
 	nodeTransition.to = consts.OFF_CLASS
 	nodeTransition.nodesList = nodesToTransit
 	sc.setTransitions(nodeTransition)
+
+	return nil
 }
