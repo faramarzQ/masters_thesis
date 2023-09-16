@@ -2,8 +2,10 @@ package scaler
 
 import (
 	"math"
+	"os"
 	"resource_manager/internal/cluster"
 	"resource_manager/internal/consts"
+	"strconv"
 
 	"k8s.io/klog"
 )
@@ -24,12 +26,21 @@ func (hs *HeuristicScaler) shouldScale(clusterMetrics cluster.ClusterMetrics) bo
 	klog.Info(consts.MSG_RUNNING_SHOULD_SCALE)
 	defer klog.Info(consts.MSG_FINISHED_SHOULD_SCALE)
 
-	if int(clusterMetrics.GetAverageMemoryUtilization()) > consts.HEURISTIC_SCALER_UPPER_MEMORY_THRESHOLD {
+	// if int(clusterMetrics.GetAverageMemoryUtilization()) > consts.HEURISTIC_SCALER_UPPER_MEMORY_THRESHOLD {
+	// 	return true
+	// }
+
+	upperCpuThreshold, err := strconv.Atoi(os.Getenv("HEURISTIC_SCALER_UPPER_CPU_THRESHOLD"))
+	if err != nil {
+		klog.Fatal(err)
+	}
+	if int(clusterMetrics.GetAverageCpuUtilization()) > upperCpuThreshold {
 		return true
 	}
 
-	if int(clusterMetrics.GetAverageCpuUtilization()) > consts.HEURISTIC_SCALER_UPPER_CPU_THRESHOLD {
-		return true
+	offNodesCount := len(cluster.ListNodes().InClass(consts.OFF_CLASS))
+	if offNodesCount == 0 {
+		return false
 	}
 
 	return false
@@ -40,14 +51,16 @@ func (hs *HeuristicScaler) planScaling(clusterMetrics cluster.ClusterMetrics) er
 	defer klog.Info(consts.MSG_FINISHED_SCALE_PLANNING)
 
 	nodes := cluster.ListNodes()
-	// TODO: move to shouldScale
 	offNodesCount := len(nodes.InClass(consts.OFF_CLASS))
 	if offNodesCount == 0 {
 		return nil
 	}
 
-	hs.planScalingConsideringMemoryResource(clusterMetrics, nodes)
-	hs.planScalingConsideringCpuResource(clusterMetrics, nodes)
+	// hs.planScalingConsideringMemoryResource(clusterMetrics, nodes)
+	err := hs.planScalingConsideringCpuResource(clusterMetrics, nodes)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -77,16 +90,21 @@ func (hs *HeuristicScaler) planScalingConsideringMemoryResource(clusterMetrics c
 }
 
 // Plans scaling nodes considering their CPU resource
-func (hs *HeuristicScaler) planScalingConsideringCpuResource(clusterMetrics cluster.ClusterMetrics, nodes cluster.NodeList) {
+func (hs *HeuristicScaler) planScalingConsideringCpuResource(clusterMetrics cluster.ClusterMetrics, nodes cluster.NodeList) error {
 
 	// If utilization hasn't pass the threshold
-	if int(clusterMetrics.GetAverageCpuUtilization()) <= consts.HEURISTIC_SCALER_UPPER_CPU_THRESHOLD {
-		return
+	upperCpuThreshold, _ := strconv.Atoi(os.Getenv("HEURISTIC_SCALER_UPPER_CPU_THRESHOLD"))
+	if int(clusterMetrics.GetAverageCpuUtilization()) <= upperCpuThreshold {
+		return nil
 	}
 
 	// How much resource to add to satisfy the desired resource util
+	desiredCpuThreshold, err := strconv.Atoi(os.Getenv("HEURISTIC_SCALER_DESIRED_CPU_UTIL"))
+	if err != nil {
+		return err
+	}
 	usedCpu := (int(clusterMetrics.GetAverageCpuUtilization()) * int(nodes.InClass(consts.ACTIVE_CLASS).TotalCpu())) / 100
-	desiredCpu := int(math.Ceil(float64(usedCpu * 100 / consts.HEURISTIC_SCALER_DESIRED_CPU_UTIL)))
+	desiredCpu := int(math.Ceil(float64(usedCpu * 100 / desiredCpuThreshold)))
 	cpusToAdd := desiredCpu - usedCpu
 
 	nodesToTransit := hs.listNodesToSatisfyDesiredCpuUtil(cpusToAdd)
@@ -99,6 +117,7 @@ func (hs *HeuristicScaler) planScalingConsideringCpuResource(clusterMetrics clus
 		hs.setTransitions(nodeTransition)
 	}
 
+	return nil
 }
 
 // Returns a list of nodes which their total memory is greater|equal to the given memory amount

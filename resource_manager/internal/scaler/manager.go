@@ -47,8 +47,8 @@ func (sm ScalerManager) Run() {
 
 	clusterMetrics := cluster.GetClusterMetrics()
 
+	sm.Scaler.prePlan()
 	if sm.Scaler.shouldScale(clusterMetrics) {
-		sm.Scaler.prePlan()
 		err := sm.Scaler.planScaling(clusterMetrics)
 		if err != nil {
 			sm.Scaler.onFail(err)

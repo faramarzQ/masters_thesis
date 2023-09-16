@@ -36,3 +36,7 @@ export FIXED_IDLE_NODES_COUNT=2
 # Monitoring server
 export MONITORING_SERVER_URL=http://192.168.49.2:32000/
 # export MONITORING_SERVER_URL=http://localhost:5555/
+
+# Heuristic scaler
+export HEURISTIC_SCALER_UPPER_CPU_THRESHOLD=70
+export HEURISTIC_SCALER_DESIRED_CPU_UTIL=60

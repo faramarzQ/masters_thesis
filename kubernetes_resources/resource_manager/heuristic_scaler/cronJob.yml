@@ -1,0 +1,39 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: heuristic-scaler
+spec:
+  schedule: "*/10 * * * *"
+  successfulJobsHistoryLimit: 0
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: heuristic-scaler
+        spec:
+          nodeSelector:
+            minikube.k8s.io/primary: "true"
+          containers:
+          - name: resource-manager
+            image: resource_manager:0.440
+            command: ["make", "run-heuristic-scaler-bin"]
+            env:
+              - name: LOG_TO_CONSOLE
+                value: "false"
+              - name: LOG_FILE_DIR
+                value: "/app/storage/heuristic_scaler_logs.log"
+              - name: HEURISTIC_SCALER_UPPER_CPU_THRESHOLD
+                value: "70"
+              - name: HEURISTIC_SCALER_DESIRED_CPU_UTIL
+                value: "50"
+            volumeMounts:
+              - mountPath: "/app/storage"
+                name: resource-manager-volume
+          volumes:
+            - name: resource-manager-volume
+              hostPath:
+                path: /pod_volumes/resource_manager
+                type: Directory
+          restartPolicy: Never

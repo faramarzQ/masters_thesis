@@ -33,7 +33,11 @@ func (bs *baseScaler) shouldScale(_ cluster.ClusterMetrics) bool {
 	return true
 }
 
-func (bs *baseScaler) onFail(err error) {}
+func (bs *baseScaler) onFail(err error) {
+	klog.Info(consts.MSG_FAILED_PLANNING)
+	repository.DeleteScalingExecutionLog(&scalerExecutionLog)
+	klog.Fatal(err)
+}
 
 func (bs *baseScaler) prePlan() {
 	klog.Info(consts.MSG_RUNNING_PRE_PLANNING)
