@@ -36,8 +36,6 @@ var (
 	// TODO: move to env vars
 	IDLE_NODE_DURATION_MINUTES = 10
 
-	IDLE_WAKEUP_DURATION_MINUTES = 10
-
 	RANDOM_SCALER    = "RandomScaler"
 	HEURISTIC_SCALER = "HeuristicScaler"
 	FIXED_SCALER     = "FixedScaler"

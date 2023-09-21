@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -19,20 +20,21 @@ type response struct {
 }
 
 var (
+	buckets  = []float64{.005, .01, .025, .05, .1, .25, .5, 1, 2.5, 5, 10, 30, 60}
 	requests = prometheus.NewCounter(prometheus.CounterOpts{
 		Name: "requests_total",
 		Help: "Number of all requests.",
 	})
-
-	successRequests = prometheus.NewCounter(prometheus.CounterOpts{
-		Name: "success_requests_total",
-		Help: "Number of Success requests.",
-	})
+	responseTime = prometheus.NewHistogramVec(prometheus.HistogramOpts{
+		Name:    "response_duration",
+		Help:    "Time duration of responses.",
+		Buckets: buckets,
+	}, []string{})
 )
 
 func init() {
 	prometheus.MustRegister(requests)
-	prometheus.MustRegister(successRequests)
+	prometheus.MustRegister(responseTime)
 }
 
 func main() {
@@ -57,6 +59,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	requests.Inc()
 
+	start := time.Now()
+
 	ctx := context.Background()
 	fibonacciHost := string(os.Getenv("FIBONACCI_NODEPORT_SERVICE_HOST"))
 	fibonacciPort := os.Getenv("FIBONACCI_NODEPORT_SERVICE_PORT")
@@ -72,12 +76,13 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		klog.Error("Error making http request: %s\n", err)
 	}
 
+	duration := time.Since(start)
+	responseTime.WithLabelValues().Observe(duration.Seconds())
+
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		klog.Error(err)
 	}
-
-	successRequests.Inc()
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(body)
