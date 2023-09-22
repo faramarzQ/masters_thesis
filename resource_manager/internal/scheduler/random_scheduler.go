@@ -20,7 +20,7 @@ type RandomScheduler struct {
 	framework.ScorePlugin
 }
 
-type ScoreExtension struct{}
+type RandomSchedulerScoreExtension struct{}
 
 func NewRandomScheduler() *RandomScheduler {
 	return &RandomScheduler{
@@ -29,7 +29,7 @@ func NewRandomScheduler() *RandomScheduler {
 }
 
 func (rs *RandomScheduler) Name() string {
-	return consts.RANDOM_SCHEDULER_NAME
+	return consts.RANDOM_SCHEDULER
 }
 
 func (rs *RandomScheduler) factory(_ runtime.Object, _ framework.Handle) (framework.Plugin, error) {
@@ -37,7 +37,7 @@ func (rs *RandomScheduler) factory(_ runtime.Object, _ framework.Handle) (framew
 }
 
 func (rs *RandomScheduler) ScoreExtensions() framework.ScoreExtensions {
-	return &ScoreExtension{}
+	return &RandomSchedulerScoreExtension{}
 }
 
 func (rs *RandomScheduler) Filter(ctx context.Context, state *framework.CycleState, p *v1.Pod, nodeInfo *framework.NodeInfo) *framework.Status {
@@ -61,14 +61,11 @@ func (rs *RandomScheduler) PreScore(ctx context.Context, state *framework.CycleS
 
 	// Give random score to every node
 	rand.Seed(time.Now().UnixNano())
-	rs.set("selected_nodes_for_"+pod.Name, []string{
-		nodes[rand.Intn(len(nodes))].Name,
-	})
-
 	var nodesScore = make(map[string]int64)
 	for _, node := range nodes {
 		nodesScore[node.Name] = int64(rand.Intn(int(framework.MaxNodeScore)))
 	}
+	rs.set("nodes_score_for_"+pod.Name, nodesScore)
 
 	klog.Info("PreScoring Pod: ", pod.Name)
 	return framework.NewStatus(status)
@@ -76,19 +73,15 @@ func (rs *RandomScheduler) PreScore(ctx context.Context, state *framework.CycleS
 
 func (rs *RandomScheduler) Score(ctx context.Context, state *framework.CycleState, p *v1.Pod, nodeName string) (int64, *framework.Status) {
 	pod := cluster.BindPod(*p)
-	var score int64
+
 	nodesScore := rs.get("nodes_score_for_" + pod.Name).(map[string]int64)
-	for key, value := range nodesScore {
-		if key == nodeName {
-			score = value
-		}
-	}
+	score := nodesScore[nodeName]
 
 	klog.Info("Scoring Pod: ", pod.Name, " on ", nodeName, " : ", score)
 	return score, framework.NewStatus(framework.Success)
 }
 
-func (se *ScoreExtension) NormalizeScore(ctx context.Context, state *framework.CycleState, p *v1.Pod, scores framework.NodeScoreList) *framework.Status {
+func (se *RandomSchedulerScoreExtension) NormalizeScore(ctx context.Context, state *framework.CycleState, p *v1.Pod, scores framework.NodeScoreList) *framework.Status {
 	var highest int64
 	for _, nodeScore := range scores {
 		highest = max(int64(highest), nodeScore.Score)
