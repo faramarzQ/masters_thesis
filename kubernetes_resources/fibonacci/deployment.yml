@@ -5,7 +5,7 @@ metadata:
   labels:
     app: fibonacci
 spec:
-  # replicas: 1
+  replicas: 1
   selector:
     matchLabels:
       app: fibonacci
@@ -18,12 +18,16 @@ spec:
         prometheus.io/path: '/metrics'
         prometheus.io/port: '3333'
     spec:
+      schedulerName: random-scheduler
       nodeSelector:
         worker: "true"
         class: "active"
       containers:
       - name: fibonacci
         image: fibonacci:0.2
+        env:
+          - name: FIBONACCI_TIMEOUT_SECONDS
+            value: "10"
         ports:
         - containerPort: 3333
         resources:

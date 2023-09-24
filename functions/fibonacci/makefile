@@ -1,0 +1,6 @@
+# App env vars
+FIBONACCI_TIMEOUT_SECONDS=10
+
+run-fibonacci:
+	FIBONACCI_TIMEOUT_SECONDS=$(FIBONACCI_TIMEOUT_SECONDS) \
+	go run main.go

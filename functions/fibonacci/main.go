@@ -6,9 +6,11 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"k8s.io/klog"
 )
 
 type response struct {
@@ -22,6 +24,8 @@ var (
 		Help:        "Number of all successful requests.",
 		ConstLabels: prometheus.Labels{"instance": "function/fibonacci", "path": "success_requests_total", "method": "GET"},
 	})
+
+	timeout int
 )
 
 func init() {
@@ -34,35 +38,54 @@ func main() {
 	http.HandleFunc("/", fibonacciHandler)
 	http.Handle("/metrics", promhttp.Handler())
 
-	err := http.ListenAndServe(":3333", nil)
+	var err error
+	timeout, err = strconv.Atoi(os.Getenv("FIBONACCI_TIMEOUT_SECONDS"))
 	if err != nil {
-		fmt.Println("Error occurred running server: ", err)
+		klog.Error("Failed reading env var: FIBONACCI_TIMEOUT_SECONDS")
+	}
+
+	err = http.ListenAndServe(":3333", nil)
+	if err != nil {
+		klog.Fatal("Error occurred running server: ", err)
 	}
 }
 
 // Handler for fibonacci calculator
 func fibonacciHandler(w http.ResponseWriter, r *http.Request) {
 	number, err := strconv.Atoi(r.URL.Query().Get("number"))
-	fmt.Println("Got a request: ", number)
+	klog.Info("Got a request: ", number)
 	if err != nil {
-		fmt.Println("Wrong input!")
+		klog.Error("Wrong input!")
 	}
 
-	result := fibonacci(number)
+	resChan := make(chan int)
+	go calculateFibonacci(number, resChan)
 
 	response := response{
-		result,
-		os.Getenv("HOSTNAME"),
+		ProcessedBy: os.Getenv("HOSTNAME"),
+	}
+
+	select {
+	case result := <-resChan:
+		response.Result = result
+	case <-time.After(time.Duration(timeout) * time.Second):
+		klog.Error("Execution timeout!")
+		w.WriteHeader(http.StatusGatewayTimeout)
+		return
 	}
 
 	responseBytes, err := json.Marshal(response)
 	if err != nil {
-		fmt.Println("500 internal error!")
+		klog.Error("500 internal error!")
 	}
 
 	requests.Inc()
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(responseBytes)
+}
+
+func calculateFibonacci(number int, resChan chan int) {
+	resChan <- fibonacci(number)
 }
 
 // Returns the fibonacci of a given number
