@@ -9,5 +9,5 @@ run-gateway:
 	FIBONACCI_NODEPORT_SERVICE_PORT=$(FIBONACCI_NODEPORT_SERVICE_PORT) \
 	go run main.go
 
-build-image:
+build-gateway-image:
 	docker build --tag $(IMAGE_NAME):1.0 .

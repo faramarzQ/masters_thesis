@@ -7,5 +7,5 @@ run-fibonacci:
 	FIBONACCI_TIMEOUT_SECONDS=$(FIBONACCI_TIMEOUT_SECONDS) \
 	go run main.go
 
-build-fibonacci:
+build-fibonacci-image:
 	docker build --tag $(IMAGE_NAME):1.0 .
