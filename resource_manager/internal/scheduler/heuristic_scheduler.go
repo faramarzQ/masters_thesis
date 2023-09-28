@@ -16,6 +16,7 @@ type HeuristicScheduler struct {
 	framework.FilterPlugin
 	framework.PreScorePlugin
 	framework.ScorePlugin
+	framework.PostBindPlugin
 }
 
 type HeuristicSchedulerScoreExtension struct{}
@@ -89,4 +90,9 @@ func (se *HeuristicSchedulerScoreExtension) NormalizeScore(ctx context.Context, 
 
 	klog.Info("Normalized scores: ", scores)
 	return framework.NewStatus(framework.Success)
+}
+
+func (*HeuristicScheduler) PostBind(ctx context.Context, state *framework.CycleState, p *v1.Pod, nodeName string) {
+	node := cluster.GetNodeByName(nodeName)
+	node.SetClass(consts.ACTIVE_CLASS)
 }

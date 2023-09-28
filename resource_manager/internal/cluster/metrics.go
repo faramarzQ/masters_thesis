@@ -197,10 +197,7 @@ func CalculateEnergyConsumption(previousScalerExecutionLog databaseModels.Scaler
 		var energyConsumptionOfNode float64
 		var maxEnergyConsumptionOfNode float64
 		for _, slot := range periodTimeSlots {
-			usedCpuCoresInSlot, err := node.GetUsedCpuCoresAtGiveTime(slot)
-			if err != nil {
-				continue
-			}
+			usedCpuCoresInSlot := node.GetUsedCpuCoresAtGiveTime(slot)
 
 			cpuUtil := (usedCpuCoresInSlot / totalCpuCores) * 100
 			powerAtSlot := (float64(maxPower-minPower) * cpuUtil / 100) + float64(minPower)

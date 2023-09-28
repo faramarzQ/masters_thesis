@@ -16,3 +16,6 @@ profiles:
     score:
       enabled:
         - name: 'RandomScheduler'
+    postScore:
+      enabled:
+        - name: 'RandomScheduler'

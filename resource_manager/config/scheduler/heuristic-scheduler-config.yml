@@ -16,3 +16,6 @@ profiles:
     score:
       enabled:
         - name: 'HeuristicScheduler'
+    postScore:
+      enabled:
+        - name: 'HeuristicScheduler'

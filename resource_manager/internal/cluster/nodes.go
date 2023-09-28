@@ -2,7 +2,6 @@ package cluster
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"math"
 	"math/rand"
@@ -245,10 +244,7 @@ func (n Node) GetMemoryUtilization() float64 {
 // Calculate node's cpu utilization
 func (n Node) GetCpuUtilization() float64 {
 	totalCpu := n.GetTotalCpuCores()
-	usedCpu, err := n.GetUsedCpuCoresAtGiveTime(time.Now())
-	if err != nil {
-		klog.Fatal(usedCpu)
-	}
+	usedCpu := n.GetUsedCpuCoresAtGiveTime(time.Now())
 
 	cpuUtilization := (float64(usedCpu) / float64(totalCpu)) * 100
 	cpuUtilizationRounded := math.Floor(cpuUtilization*1) / 1
@@ -276,12 +272,12 @@ func (n Node) GetTotalCpuCores() float64 {
 	return float64(result.(model.Vector)[0].Value)
 }
 
-func (n Node) GetUsedCpuCoresAtGiveTime(time time.Time) (float64, error) {
+func (n Node) GetUsedCpuCoresAtGiveTime(time time.Time) float64 {
 	result := prometheus.Query("sum(rate(container_cpu_usage_seconds_total{instance=~'"+n.Name+"', pod=~'fibonacci.*'}[1m]))", time)
 	if len(result.(model.Vector)) != 0 {
-		return float64(result.(model.Vector)[0].Value), nil
+		return float64(result.(model.Vector)[0].Value)
 	}
-	return 0, errors.New("Failed finding any data at the given time")
+	return 0
 }
 
 // List all nodes in the cluster
@@ -347,6 +343,16 @@ func LabelNewNodes() {
 func MasterNode() *Node {
 	for _, node := range ListAllNodes() {
 		if node.IsMaster == true {
+			return &node
+		}
+	}
+
+	return nil
+}
+
+func GetNodeByName(name string) *Node {
+	for _, node := range ListAllNodes() {
+		if node.Name == name {
 			return &node
 		}
 	}

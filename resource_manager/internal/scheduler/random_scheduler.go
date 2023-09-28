@@ -18,6 +18,7 @@ type RandomScheduler struct {
 	framework.FilterPlugin
 	framework.PreScorePlugin
 	framework.ScorePlugin
+	framework.PostBindPlugin
 }
 
 type RandomSchedulerScoreExtension struct{}
@@ -81,7 +82,7 @@ func (rs *RandomScheduler) Score(ctx context.Context, state *framework.CycleStat
 	return score, framework.NewStatus(framework.Success)
 }
 
-func (se *RandomSchedulerScoreExtension) NormalizeScore(ctx context.Context, state *framework.CycleState, p *v1.Pod, scores framework.NodeScoreList) *framework.Status {
+func (*RandomSchedulerScoreExtension) NormalizeScore(ctx context.Context, state *framework.CycleState, p *v1.Pod, scores framework.NodeScoreList) *framework.Status {
 	var highest int64
 	for _, nodeScore := range scores {
 		highest = max(int64(highest), nodeScore.Score)
@@ -93,6 +94,11 @@ func (se *RandomSchedulerScoreExtension) NormalizeScore(ctx context.Context, sta
 
 	klog.Info("Normalized scores: ", scores)
 	return framework.NewStatus(framework.Success)
+}
+
+func (rs *RandomScheduler) PostBind(ctx context.Context, state *framework.CycleState, p *v1.Pod, nodeName string) {
+	node := cluster.GetNodeByName(nodeName)
+	node.SetClass(consts.ACTIVE_CLASS)
 }
 
 func max(a, b int64) int64 {
