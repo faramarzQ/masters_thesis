@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"math"
 	"net/http"
 	"os"
@@ -58,11 +59,11 @@ func (ps *ProposedScaler) planScaling(clusterMetrics cluster.ClusterMetrics) err
 	response, err := http.Post(os.Getenv("AI_AGENT_URL"), "application/json",
 		bytes.NewBuffer(payload))
 	if err != nil {
-		return errors.New("Received error on calling AI agent: " + err.Error())
+		return errors.New(fmt.Sprintf(consts.ERROR_CALLING_AI_AGENT, err.Error()))
 	}
 
 	if response.StatusCode == http.StatusInternalServerError {
-		return errors.New("Received 500 internal server error from the AI-agent!")
+		return errors.New(consts.ERROR_INTERNAL_AI_AGENT)
 	}
 
 	var responseMap map[string]interface{}

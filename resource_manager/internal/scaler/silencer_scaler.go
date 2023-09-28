@@ -1,6 +1,7 @@
 package scaler
 
 import (
+	"fmt"
 	"os"
 	"strconv"
 	"time"
@@ -80,7 +81,7 @@ func (sc *SilencerScaler) silenceActiveNodes() error {
 			pod := node.ListPods()[0]
 			warmPodDuration, err := strconv.Atoi(os.Getenv("WARM_POD_DURATION_MINUTES"))
 			if err != nil {
-				klog.Info("Failed parsing WARM_POD_DURATION_MINUTES variable")
+				klog.Info(fmt.Sprintf(consts.ERROR_PARSING_ENV, "WARM_POD_DURATION_MINUTES"))
 				return err
 			}
 
@@ -122,7 +123,7 @@ func (sc *SilencerScaler) silenceIdleNodes() error {
 	nodes := cluster.ListNodes().InClass(consts.IDLE_CLASS)
 	idleNodeDuration, err := strconv.Atoi(os.Getenv("IDLE_NODE_DURATION_MINUTES"))
 	if err != nil {
-		klog.Info("Failed parsing IDLE_NODE_DURATION_MINUTES variable")
+		klog.Info(fmt.Sprintf(consts.ERROR_PARSING_ENV, "IDLE_NODE_DURATION_MINUTES"))
 		return err
 	}
 
