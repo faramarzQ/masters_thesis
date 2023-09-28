@@ -1,0 +1,18 @@
+apiVersion: kubescheduler.config.k8s.io/v1
+kind: KubeSchedulerConfiguration
+leaderElection:
+  leaderElect: false
+clientConnection:
+  kubeconfig: "/etc/kubernetes/admin.conf"
+profiles:
+- schedulerName: default-scheduler
+  plugins:
+    filter:
+      enabled:
+        - name: DefaultScheduler
+    preScore:
+      enabled:
+        - name: 'DefaultScheduler'
+    postScore:
+      enabled:
+        - name: 'DefaultScheduler'

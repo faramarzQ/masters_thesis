@@ -57,14 +57,13 @@ var (
 
 	RANDOM_SCHEDULER    = "RandomScheduler"
 	HEURISTIC_SCHEDULER = "HeuristicScheduler"
+	DEFAULT_SCHEDULER   = "DefaultScheduler"
 
 	MAP_SCHEDULER_ID_TO_NAME = map[uint]string{
 		1: RANDOM_SCHEDULER,
 		2: HEURISTIC_SCHEDULER,
+		3: DEFAULT_SCHEDULER,
 	}
-
-	SCALING_OUT SCALING_TYPE = "scaling out"
-	SCALING_IN  SCALING_TYPE = "scaling in"
 
 	PROMETHEUS_METRIC_NAME_SUCCESS_REQUESTS = "success_requests_total"
 	PROMETHEUS_METRIC_NAME_TOTAL_REQUESTS   = "requests_total"

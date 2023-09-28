@@ -24,6 +24,7 @@ func NewSchedulerManager() *schedulerManager {
 	schedulerManager.RegisterActiveScheduler(
 		NewRandomScheduler(),
 		NewHeuristicScheduler(),
+		NewDefaultScheduler(),
 	)
 
 	command := app.NewSchedulerCommand(

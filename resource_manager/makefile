@@ -15,6 +15,10 @@ ENV_MINIKUBE_BIN := env_minikube_bin.sh
 
 RANDOM_SCHEDULER_DEFAULT_FLAGS=--authentication-kubeconfig=/etc/kubernetes/scheduler.conf --authorization-kubeconfig=/etc/kubernetes/scheduler.conf --config=../config/scheduler/random-scheduler-config.yml --secure-port=10260
 HEURISTIC_SCHEDULER_DEFAULT_FLAGS=--authentication-kubeconfig=/etc/kubernetes/scheduler.conf --authorization-kubeconfig=/etc/kubernetes/scheduler.conf --config=../config/scheduler/heuristic-scheduler-config.yml --secure-port=10260
+DEFAULT_SCHEDULER_DEFAULT_FLAGS=--authentication-kubeconfig=/etc/kubernetes/scheduler.conf --authorization-kubeconfig=/etc/kubernetes/scheduler.conf --config=../config/scheduler/default-scheduler-config.yml --secure-port=10260
+
+SCALER_IMAGE_NAME=scaler
+SCHEDULER_IMAGE_NAME=scheduler
 
 #
 # Scaler
@@ -42,6 +46,8 @@ run-silencer-scaler:
 	cd $(SCRIPTS_DIR) && . ./$(ENV_LOCAL) \
 	&& cd $(PROJECT_ROOT) && APP=scaler APP_ID=5 go run $(SCALER_ENTRY) $(flags)
 
+build-scaler-image:
+	docker build --tag $(SCALER_IMAGE_NAME):1.0 .
 
 # On Minikube
 
@@ -86,3 +92,10 @@ run-random-scheduler-bin:
 run-heuristic-scheduler-bin:
 	cd $(SCRIPTS_DIR) && . ./$(ENV_MINIKUBE_BIN) \
 	&& cd $(BIN_DIR) && APP=scheduler APP_ID=2 ./scheduler $(HEURISTIC_SCHEDULER_DEFAULT_FLAGS) $(flags)
+
+run-default-scheduler-bin:
+	cd $(SCRIPTS_DIR) && . ./$(ENV_MINIKUBE_BIN) \
+	&& cd $(BIN_DIR) && APP=scheduler APP_ID=3 ./scheduler $(DEFAULT_SCHEDULER_DEFAULT_FLAGS) $(flags)
+
+build-scheduler-image:
+	docker build --tag $(SCHEDULER_IMAGE_NAME):1.0 .
