@@ -17,7 +17,7 @@ spec:
             minikube.k8s.io/primary: "true"
           containers:
           - name: resource-manager
-            image: resource_manager:0.438
+            image: scaler:1.0
             command: ["make", "run-random-scaler-bin"]
             env:
               - name: LOG_TO_CONSOLE

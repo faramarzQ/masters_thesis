@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: ai-agent
-        image: ai_agent:0.4
+        image: ai_agent:1.0
         ports:
         - containerPort: 8080
         volumeMounts:

@@ -3,7 +3,7 @@ kind: CronJob
 metadata:
   name: silencer-scaler
 spec:
-  schedule: "*/10 * * * *"
+  schedule: "*/1 * * * *"
   successfulJobsHistoryLimit: 0
   failedJobsHistoryLimit: 3
   jobTemplate:
@@ -17,7 +17,7 @@ spec:
             minikube.k8s.io/primary: "true"
           containers:
           - name: resource-manager
-            image: resource_manager:0.436
+            image: scaler:1.0
             command: ["make", "run-silencer-scaler-bin"]
             env:
               - name: LOG_TO_CONSOLE
@@ -27,7 +27,7 @@ spec:
               - name: WARM_POD_DURATION_MINUTES
                 value: "1"
               - name: IDLE_NODE_DURATION_MINUTES
-                value: "10"
+                value: "2"
             volumeMounts:
               - mountPath: "/app/storage"
                 name: resource-manager-volume

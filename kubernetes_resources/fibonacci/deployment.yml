@@ -18,13 +18,13 @@ spec:
         prometheus.io/path: '/metrics'
         prometheus.io/port: '3333'
     spec:
-      schedulerName: random-scheduler
+      # schedulerName: random-scheduler
       nodeSelector:
         worker: "true"
         class: "active"
       containers:
       - name: fibonacci
-        image: fibonacci:0.2
+        image: fibonacci:1.0
         env:
           - name: FIBONACCI_TIMEOUT_SECONDS
             value: "10"

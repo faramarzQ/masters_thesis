@@ -22,7 +22,7 @@ spec:
             minikube.k8s.io/primary: "true"
           containers:
           - name: resource-manager
-            image: resource_manager:0.438
+            image: scaler:1.0
             command: ["make", "run-fixed-scaler-bin"]
             env:
               - name: FIXED_IDLE_NODES_COUNT
