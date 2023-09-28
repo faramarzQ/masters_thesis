@@ -1,2 +1,1 @@
-Setup using
- https://github.com/techiescamp/kubernetes-prometheus/tree/master
+Installation source: https://github.com/techiescamp/kubernetes-prometheus/tree/master
