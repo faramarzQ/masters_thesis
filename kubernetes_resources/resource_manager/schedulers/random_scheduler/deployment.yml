@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: random-scheduler
+  labels:
+    app: random-scheduler
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: random-scheduler
+  template:
+    metadata:
+      labels:
+        app: random-scheduler
+    spec:
+      serviceAccountName: scheduler
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      nodeSelector:
+        minikube.k8s.io/primary: "true"
+      containers:
+      - name: random-scheduler
+        image: scheduler:1.0
+        command: ["make", "run-random-scheduler-bin"]
+        ports:
+        - containerPort: 10260
+        volumeMounts:
+          - name:  scheduler-volume
+            mountPath: /etc/kubernetes
+      volumes:
+        - name: scheduler-volume
+          hostPath:
+            path: /etc/kubernetes
+            type: Directory

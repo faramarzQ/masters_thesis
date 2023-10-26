@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: heuristic-scheduler
+  labels:
+    app: heuristic-scheduler
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: heuristic-scheduler
+  template:
+    metadata:
+      labels:
+        app: heuristic-scheduler
+    spec:
+      serviceAccountName: scheduler
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      nodeSelector:
+        minikube.k8s.io/primary: "true"
+      containers:
+      - name: heuristic-scheduler
+        image: scheduler:1.0
+        command: ["make", "run-heuristic-scheduler-bin"]
+        ports:
+        - containerPort: 10260
+        volumeMounts:
+          - name:  scheduler-volume
+            mountPath: /etc/kubernetes
+      volumes:
+        - name: scheduler-volume
+          hostPath:
+            path: /etc/kubernetes
+            type: Directory
