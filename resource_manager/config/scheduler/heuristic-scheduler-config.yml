@@ -16,6 +16,6 @@ profiles:
     score:
       enabled:
         - name: 'HeuristicScheduler'
-    postScore:
+    postBind:
       enabled:
         - name: 'HeuristicScheduler'

@@ -5,7 +5,7 @@ leaderElection:
 clientConnection:
   kubeconfig: "/etc/kubernetes/admin.conf"
 profiles:
-- schedulerName: default-scheduler
+- schedulerName: default-custom-scheduler
   plugins:
     filter:
       enabled:
@@ -13,6 +13,9 @@ profiles:
     preScore:
       enabled:
         - name: 'DefaultScheduler'
-    postScore:
+    score:
+      enabled:
+        - name: 'DefaultScheduler'
+    postBind:
       enabled:
         - name: 'DefaultScheduler'

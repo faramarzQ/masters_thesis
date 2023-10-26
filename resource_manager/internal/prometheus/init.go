@@ -1,10 +1,11 @@
 package prometheus
 
 import (
-	"log"
+	"fmt"
 	"os"
 
 	"github.com/prometheus/client_golang/api"
+	"k8s.io/klog"
 )
 
 var apiClient api.Client
@@ -14,9 +15,12 @@ func Init() {
 	client, err := api.NewClient(api.Config{
 		Address: os.Getenv("PROMETHEUS_URL"),
 	})
+	fmt.Println(os.Getenv("PROMETHEUS_URL"))
 	if err != nil {
-		log.Fatalf("Error creating client: %v\n", err)
+		klog.Fatalf("Error creating client: %v\n", err)
 	}
+
+	klog.Info("Created Prometheus client.")
 
 	apiClient = client
 }

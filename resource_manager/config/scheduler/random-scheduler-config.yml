@@ -16,6 +16,6 @@ profiles:
     score:
       enabled:
         - name: 'RandomScheduler'
-    postScore:
+    postBind:
       enabled:
         - name: 'RandomScheduler'

@@ -8,6 +8,8 @@ var (
 	SCHEDULER_APPLICATION = "scheduler"
 
 	NODE_CLASS_LABEL_NAME            = "class"
+	NODE_GATEWAY_LABEL_NAME          = "gateway"
+	NODE_WORKER_LABEL_NAME           = "worker"
 	NODE_SCALED_AT_LABEL_NAME        = "scaled_at"
 	WORKER_NODE_LABEL_NAME           = "worker"
 	POD_WARM_LABEL_NAME              = "warm"

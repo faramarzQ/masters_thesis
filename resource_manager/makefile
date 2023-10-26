@@ -20,6 +20,9 @@ DEFAULT_SCHEDULER_DEFAULT_FLAGS=--authentication-kubeconfig=/etc/kubernetes/sche
 SCALER_IMAGE_NAME=scaler
 SCHEDULER_IMAGE_NAME=scheduler
 
+SCALER_DOCKERFILE=scaler.Dockerfile
+SCHEDULER_DOCKERFILE=scheduler.Dockerfile
+
 #
 # Scaler
 #
@@ -47,7 +50,7 @@ run-silencer-scaler:
 	&& cd $(PROJECT_ROOT) && APP=scaler APP_ID=5 go run $(SCALER_ENTRY) $(flags)
 
 build-scaler-image:
-	docker build --tag $(SCALER_IMAGE_NAME):1.0 .
+	docker build --tag $(SCALER_IMAGE_NAME):1.0 . -f $(SCALER_DOCKERFILE)
 
 # On Minikube
 
@@ -98,4 +101,4 @@ run-default-scheduler-bin:
 	&& cd $(BIN_DIR) && APP=scheduler APP_ID=3 ./scheduler $(DEFAULT_SCHEDULER_DEFAULT_FLAGS) $(flags)
 
 build-scheduler-image:
-	docker build --tag $(SCHEDULER_IMAGE_NAME):1.0 .
+	docker build --tag $(SCHEDULER_IMAGE_NAME):1.0 . -f $(SCHEDULER_DOCKERFILE)

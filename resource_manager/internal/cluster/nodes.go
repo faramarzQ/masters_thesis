@@ -155,6 +155,42 @@ func (n *Node) SetClass(class consts.NODE_CLASS) {
 	n.SetScaledAt(time.Now())
 }
 
+// Set node as a gateway
+func (n *Node) SetGateway() {
+	labelPatch := fmt.Sprintf(`[{"op":"add","path":"/metadata/labels/%s","value":"%s" }]`, consts.NODE_GATEWAY_LABEL_NAME, "true")
+	_, err := Clientset.CoreV1().Nodes().Patch(context.Background(), n.Name, types.JSONPatchType, []byte(labelPatch), metav1.PatchOptions{})
+	if err != nil {
+		panic(err)
+	}
+}
+
+// Unset node as a gateway
+func (n *Node) UnsetGateway() {
+	labelPatch := fmt.Sprintf(`[{"op":"add","path":"/metadata/labels/%s","value":"%s" }]`, consts.NODE_GATEWAY_LABEL_NAME, "false")
+	_, err := Clientset.CoreV1().Nodes().Patch(context.Background(), n.Name, types.JSONPatchType, []byte(labelPatch), metav1.PatchOptions{})
+	if err != nil {
+		panic(err)
+	}
+}
+
+// Set node as a worker
+func (n *Node) SetWorker() {
+	labelPatch := fmt.Sprintf(`[{"op":"add","path":"/metadata/labels/%s","value":"%s" }]`, consts.NODE_WORKER_LABEL_NAME, "true")
+	_, err := Clientset.CoreV1().Nodes().Patch(context.Background(), n.Name, types.JSONPatchType, []byte(labelPatch), metav1.PatchOptions{})
+	if err != nil {
+		panic(err)
+	}
+}
+
+// Unset node as a worker
+func (n *Node) UnsetWorker() {
+	labelPatch := fmt.Sprintf(`[{"op":"add","path":"/metadata/labels/%s","value":"%s" }]`, consts.NODE_WORKER_LABEL_NAME, "false")
+	_, err := Clientset.CoreV1().Nodes().Patch(context.Background(), n.Name, types.JSONPatchType, []byte(labelPatch), metav1.PatchOptions{})
+	if err != nil {
+		panic(err)
+	}
+}
+
 // Sets an annotation on the node
 func (n *Node) SetAnnotation(key, value string) {
 	annotations := n.Annotations
