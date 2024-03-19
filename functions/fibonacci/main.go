@@ -33,8 +33,6 @@ func init() {
 }
 
 func main() {
-	fmt.Println("Executing fibonacci function.")
-
 	http.HandleFunc("/", fibonacciHandler)
 	http.Handle("/metrics", promhttp.Handler())
 
@@ -48,6 +46,7 @@ func main() {
 	if err != nil {
 		klog.Fatal("Error occurred running server: ", err)
 	}
+	fmt.Println("Listening on port 3333")
 }
 
 // Handler for fibonacci calculator
@@ -61,38 +60,44 @@ func fibonacciHandler(w http.ResponseWriter, r *http.Request) {
 	resChan := make(chan int)
 	go calculateFibonacci(number, resChan)
 
-	response := response{
-		ProcessedBy: os.Getenv("HOSTNAME"),
-	}
-
-	select {
-	case result := <-resChan:
-		response.Result = result
-	case <-time.After(time.Duration(timeout) * time.Second):
-		klog.Error("Execution timeout!")
+	result := <-resChan
+	if result == -1 {
 		w.WriteHeader(http.StatusGatewayTimeout)
 		return
 	}
 
-	responseBytes, err := json.Marshal(response)
+	res := response{
+		ProcessedBy: os.Getenv("HOSTNAME"),
+		Result:      result,
+	}
+
+	responseBytes, err := json.Marshal(res)
 	if err != nil {
 		klog.Error("500 internal error!")
 	}
 
 	requests.Inc()
+
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(responseBytes)
+	return
 }
 
 func calculateFibonacci(number int, resChan chan int) {
-	resChan <- fibonacci(number)
+	timeoutTime := time.Now().Add(time.Second * time.Duration(timeout))
+	resChan <- fibonacci(number, timeoutTime, resChan)
 }
 
 // Returns the fibonacci of a given number
-func fibonacci(n int) int {
+func fibonacci(n int, timeout time.Time, resChan chan int) int {
+	if time.Now().After(timeout) {
+		resChan <- -1
+		return -1
+	}
+
 	if n < 2 {
 		return n
 	}
 
-	return fibonacci(n-1) + fibonacci(n-2)
+	return fibonacci(n-1, timeout, resChan) + fibonacci(n-2, timeout, resChan)
 }
