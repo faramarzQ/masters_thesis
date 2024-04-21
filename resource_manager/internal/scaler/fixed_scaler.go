@@ -47,7 +47,7 @@ func (fs *FixedScaler) shouldScale(clusterMetrics cluster.ClusterMetrics) bool {
 	return false
 }
 
-// In case any off node exists, transits them the idle class to meet the fixed number required,
+// In case any off node exists, transits them to the idle class to meet the fixed number required.
 // Nodes are selected randomly
 func (fs *FixedScaler) planScaling(cluster.ClusterMetrics) error {
 	klog.Info(consts.MSG_RUNNING_SCALE_PLANNING)

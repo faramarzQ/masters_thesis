@@ -6,6 +6,7 @@ import (
 	"resource_manager/internal/consts"
 	"resource_manager/internal/database/model"
 	"resource_manager/internal/database/repository"
+	monitoringClient "resource_manager/internal/monitoring_client"
 
 	"k8s.io/klog"
 )
@@ -78,4 +79,6 @@ func (bs *baseScaler) scale() {
 			}
 		}
 	}
+
+	monitoringClient.SetEnergyConsumptionValue(cluster.CalculateEnergyConsumption(*previousScalerExecutionLog))
 }

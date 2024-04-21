@@ -79,9 +79,9 @@ func (sc *SilencerScaler) silenceActiveNodes() error {
 		// If node only has one pod with no utilization
 		if node.GetCpuUtilization() == 0 {
 			pod := node.ListPods()[0]
-			warmPodDuration, err := strconv.Atoi(os.Getenv("WARM_POD_DURATION_MINUTES"))
+			warmPodDuration, err := strconv.Atoi(os.Getenv("SILENCER_SCALER_WARM_POD_DURATION_MINUTES"))
 			if err != nil {
-				klog.Info(fmt.Sprintf(consts.ERROR_PARSING_ENV, "WARM_POD_DURATION_MINUTES"))
+				klog.Info(fmt.Sprintf(consts.ERROR_PARSING_ENV, "SILENCER_SCALER_WARM_POD_DURATION_MINUTES"))
 				return err
 			}
 
@@ -121,9 +121,9 @@ func (sc *SilencerScaler) silenceIdleNodes() error {
 	}
 
 	nodes := cluster.ListNodes().InClass(consts.IDLE_CLASS)
-	idleNodeDuration, err := strconv.Atoi(os.Getenv("IDLE_NODE_DURATION_MINUTES"))
+	idleNodeDuration, err := strconv.Atoi(os.Getenv("SILENCER_SCALER_IDLE_NODE_DURATION_MINUTES"))
 	if err != nil {
-		klog.Info(fmt.Sprintf(consts.ERROR_PARSING_ENV, "IDLE_NODE_DURATION_MINUTES"))
+		klog.Info(fmt.Sprintf(consts.ERROR_PARSING_ENV, "SILENCER_SCALER_IDLE_NODE_DURATION_MINUTES"))
 		return err
 	}
 

@@ -98,12 +98,12 @@ func BindNode(node v1.Node) Node {
 	if isWorker {
 		maxPowerConsumption, err = strconv.Atoi(node.Annotations[consts.MAX_POWER_CONSUMPTION_LABEL_NAME])
 		if err != nil {
-			klog.Fatal(err)
+			klog.Fatal("Error reading max power consumption annotation: ", err)
 		}
 
 		minPowerConsumption, err = strconv.Atoi(node.Annotations[consts.MIN_POWER_CONSUMPTION_LABEL_NAME])
 		if err != nil {
-			klog.Fatal(err)
+			klog.Fatal("Error reading min power consumption annotation: ", err)
 		}
 	}
 
@@ -316,7 +316,7 @@ func (n Node) GetUsedCpuCoresAtGiveTime(time time.Time) float64 {
 	return 0
 }
 
-// List all nodes in the cluster
+// List all worker nodes in the cluster
 func ListNodes() NodeList {
 	listOptions := metav1.ListOptions{
 		LabelSelector: consts.WORKER_NODE_LABEL_NAME + "=true",

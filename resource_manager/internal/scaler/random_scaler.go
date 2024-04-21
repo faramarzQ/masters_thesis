@@ -3,6 +3,7 @@ package scaler
 import (
 	"math"
 	"math/rand"
+	"os"
 	"resource_manager/internal/cluster"
 	"resource_manager/internal/consts"
 	"strconv"
@@ -29,27 +30,40 @@ func (rs *RandomScaler) shouldScale(clusterMetrics cluster.ClusterMetrics) bool 
 
 	rand.Seed(time.Now().UnixNano())
 	randNum := rand.Intn(100)
-	return randNum > 50
+
+	scalingProbability, err := strconv.Atoi(os.Getenv("RANDOM_SCALER_SCALING_PROBABILITY"))
+	if err != nil {
+		klog.Fatal(err)
+	}
+
+	klog.Info("Scaling probability: ", scalingProbability)
+
+	return randNum < scalingProbability
 }
 
 func (rs *RandomScaler) planScaling(clusterMetrics cluster.ClusterMetrics) error {
 	klog.Info(consts.MSG_RUNNING_SCALE_PLANNING)
 	defer klog.Info(consts.MSG_FINISHED_SCALE_PLANNING)
 
-	nodes := cluster.ListNodes()
+	percentOfNodesToTransit, err := strconv.ParseFloat(os.Getenv("RANDOM_SCALER_PERCENT_OF_NODES_TO_TRANSIT"), 64)
+	if err != nil {
+		return err
+	}
 
-	var percentOfNodesToTransit float64 = 0.2
+	klog.Info("Percent of nodes to transit: ", percentOfNodesToTransit)
+
 	var nodeTransition nodeTransition
 	nodeTransition.from = consts.OFF_CLASS
 	nodeTransition.to = consts.IDLE_CLASS
 
-	// TODO: move to shouldScale
+	nodes := cluster.ListNodes()
 	offNodesCount := float64(len(nodes.InClass(consts.OFF_CLASS)))
 	if offNodesCount == 0 {
+		klog.Info("No Off nodes found to be scaled")
 		return nil
 	}
 
-	numberOfNodesToTransit := int64(math.Ceil(offNodesCount * percentOfNodesToTransit))
+	numberOfNodesToTransit := int64(math.Ceil(offNodesCount * percentOfNodesToTransit / 100))
 	nodeTransition.nodesList = cluster.GetRandomNodesFromNodeList(nodes.InClass(consts.OFF_CLASS), numberOfNodesToTransit)
 	rs.setTransitions(nodeTransition)
 

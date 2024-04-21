@@ -70,7 +70,6 @@ func (ps *ProposedScaler) planScaling(clusterMetrics cluster.ClusterMetrics) err
 	json.NewDecoder(response.Body).Decode(&responseMap)
 
 	monitoringClient.SetEpsilonValue(float64(responseMap["epsilon"].(float64)))
-	monitoringClient.SetEnergyConsumptionValue(clusterStatus.ClusterEnergyConsumption)
 	monitoringClient.SetRewardValue(float64(responseMap["lastStepReward"].(float64)))
 
 	repository.InsertScalerExecutionLogDetail(

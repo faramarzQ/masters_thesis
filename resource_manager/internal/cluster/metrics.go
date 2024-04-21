@@ -126,7 +126,11 @@ func (cm ClusterMetrics) GetAverageCpuUtilization() float64 {
 	for _, resourceMetrics := range cm.ActiveNodesMetrics {
 		sumCpuUtil += resourceMetrics.CpuUtilization
 	}
-	return sumCpuUtil / float64(len(cm.ActiveNodesMetrics))
+	averageCpuUtil := sumCpuUtil / float64(len(cm.ActiveNodesMetrics))
+	if math.IsNaN(averageCpuUtil) {
+		return 0
+	}
+	return averageCpuUtil
 }
 
 func (cm ClusterMetrics) GetAverageMemoryUtilization() float64 {
@@ -134,7 +138,11 @@ func (cm ClusterMetrics) GetAverageMemoryUtilization() float64 {
 	for _, resourceMetrics := range cm.ActiveNodesMetrics {
 		sumMemoryUtil += resourceMetrics.MemoryUtilization
 	}
-	return sumMemoryUtil / float64(len(cm.ActiveNodesMetrics))
+	averageMemoryUtil := sumMemoryUtil / float64(len(cm.ActiveNodesMetrics))
+	if math.IsNaN(averageMemoryUtil) {
+		return 0
+	}
+	return averageMemoryUtil
 }
 
 // Returns number of successful requests
