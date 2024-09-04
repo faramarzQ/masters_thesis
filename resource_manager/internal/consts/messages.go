@@ -6,6 +6,8 @@ var (
 	MSG_SCALER_APP_STARTED          = "Scaler application started."
 	MSG_SCALER_APP_FINISHED         = "Scaler application finished. \n ------------------------------------------\n"
 	MSG_SCHEDULER_APP_STARTED       = "Scheduler application started."
+	MSG_TAGGER_APP_STARTED          = "Tagger application started."
+	MSG_TAGGER_APP_FINISHED         = "Tagger application finished."
 	MSG_RUNNING_SCALER_MANAGER      = "Running the scaler manager."
 	MSG_FINISHED_SCALER_MANAGER     = "Finished the scaler manager."
 	MSG_RUNNING_SHOULD_SCALE        = "Running the check for scaling."

@@ -3,7 +3,7 @@ kind: CronJob
 metadata:
   name: random-scaler
 spec:
-  schedule: "*/10 * * *  *"
+  schedule: "* * * * *"
   successfulJobsHistoryLimit: 0
   failedJobsHistoryLimit: 3
   jobTemplate:

@@ -8,7 +8,7 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: fibonacci
+      app: fibonacci 
   template:
     metadata:
       labels:
@@ -18,20 +18,22 @@ spec:
         prometheus.io/path: '/metrics'
         prometheus.io/port: '3333'
     spec:
-      # schedulerName: random-scheduler
+      # schedulerName: DefaultScheduler
+      schedulerName: heuristic-scheduler
       nodeSelector:
         worker: "true"
         class: "active"
       containers:
       - name: fibonacci
         image: fibonacci:1.0
-        env:
-          - name: FIBONACCI_TIMEOUT_SECONDS
-            value: "10"
+        imagePullPolicy: Never
         ports:
         - containerPort: 3333
+        env:
+        - name: FIBONACCI_TIMEOUT_SECONDS
+          value: "1000"
         resources:
           limits:
             cpu: "500m"
           requests:
-            cpu: 500m
+            cpu: "500m"
