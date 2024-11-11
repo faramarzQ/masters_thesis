@@ -54,7 +54,7 @@ func (rs *RandomScaler) planScaling(clusterMetrics cluster.ClusterMetrics) error
 
 	var nodeTransition nodeTransition
 	nodeTransition.from = consts.OFF_CLASS
-	nodeTransition.to = consts.IDLE_CLASS
+	nodeTransition.to = consts.ACTIVE_CLASS
 
 	nodes := cluster.ListNodes()
 	offNodesCount := float64(len(nodes.InClass(consts.OFF_CLASS)))

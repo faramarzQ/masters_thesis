@@ -113,7 +113,7 @@ func (hs *HeuristicScaler) planScalingConsideringCpuResource(clusterMetrics clus
 	if len(nodesToTransit) != 0 {
 		var nodeTransition nodeTransition
 		nodeTransition.from = consts.OFF_CLASS
-		nodeTransition.to = consts.IDLE_CLASS
+		nodeTransition.to = consts.ACTIVE_CLASS
 		nodeTransition.nodesList = nodesToTransit
 		hs.setTransitions(nodeTransition)
 	}
