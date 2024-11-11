@@ -30,7 +30,9 @@ func (bs *baseScheduler) get(key string) any {
 
 // A filter functionality which should be applied on all filter plugins
 func (bs *baseScheduler) baseFilter(pod cluster.Pod, node cluster.Node) framework.Code {
-	if node.Class == consts.IDLE_CLASS {
+
+	// Nodes take a specific time to power up, wether to idle or active
+	if node.Class == consts.IDLE_CLASS || node.Class == consts.ACTIVE_CLASS {
 		scaledAt := node.GetScaledAt()
 		if scaledAt.Add(time.Minute*time.Duration(consts.IDLE_NODE_DURATION_MINUTES)).Unix() < time.Now().Unix() {
 			return framework.Unschedulable

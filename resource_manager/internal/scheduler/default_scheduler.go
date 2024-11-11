@@ -106,7 +106,9 @@ func (*DefaultScheduler) PostBind(ctx context.Context, state *framework.CycleSta
 	klog.Info("Started PostBind.")
 
 	node := cluster.GetNodeByName(nodeName)
-	node.SetClass(consts.ACTIVE_CLASS)
+	if node.Class != consts.ACTIVE_CLASS {
+		node.SetClass(consts.ACTIVE_CLASS)
+	}
 
 	klog.Info("Finished PostBind")
 }
