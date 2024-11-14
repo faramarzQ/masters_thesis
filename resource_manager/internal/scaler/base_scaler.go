@@ -44,7 +44,10 @@ func (bs *baseScaler) prePlan() {
 	klog.Info(consts.MSG_RUNNING_PRE_PLANNING)
 	defer klog.Info(consts.MSG_FINISHED_PRE_PLANNING)
 
-	cluster.MasterNode().SetAnnotation(consts.ACTIVE_SCALER_LABEL_NAME, config.ACTIVE_SCALER)
+	// set active scaler. silencer scaler is a side scaler to all the scalers.
+	if config.ACTIVE_SCALER != consts.SILENCER_SCALER {
+		cluster.MasterNode().SetAnnotation(consts.ACTIVE_SCALER_LABEL_NAME, config.ACTIVE_SCALER)
+	}
 
 	// Fetch previous execution log
 	previousScalerExecutionLog = repository.GetPreviousScalerExecutionLog(config.ACTIVE_SCALER)
