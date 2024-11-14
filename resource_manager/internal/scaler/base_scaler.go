@@ -58,6 +58,7 @@ func (bs *baseScaler) prePlan() {
 	if err != nil {
 		klog.Fatal(err)
 	}
+	klog.Error("Scaler execution log created:", scalerExecutionLog)
 }
 
 func (bs *baseScaler) scale() {
@@ -83,5 +84,7 @@ func (bs *baseScaler) scale() {
 		}
 	}
 
-	monitoringClient.SetEnergyConsumptionValue(cluster.CalculateEnergyConsumption(*previousScalerExecutionLog))
+	if previousScalerExecutionLog != nil {
+		monitoringClient.SetEnergyConsumptionValue(cluster.CalculateEnergyConsumption(*previousScalerExecutionLog))
+	}
 }

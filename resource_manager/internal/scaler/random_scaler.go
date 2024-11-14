@@ -37,6 +37,7 @@ func (rs *RandomScaler) shouldScale(clusterMetrics cluster.ClusterMetrics) bool 
 	}
 
 	klog.Info("Scaling probability: ", scalingProbability)
+	klog.Info("Random number: ", randNum)
 
 	return randNum < scalingProbability
 }
