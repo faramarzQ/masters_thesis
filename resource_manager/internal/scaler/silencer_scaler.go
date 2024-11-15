@@ -43,6 +43,8 @@ func (rs *SilencerScaler) planScaling(clusterMetrics cluster.ClusterMetrics) err
 
 // For every active node, checks if it has been inactive for a while then silences them to lower level classes
 func (sc *SilencerScaler) silenceActiveNodes() error {
+	klog.Info("Silencing active nodes")
+
 	nodes := cluster.ListActiveNodes()
 
 	// For every scaler type, directly change nodes to off class,
@@ -73,6 +75,7 @@ func (sc *SilencerScaler) silenceActiveNodes() error {
 		if podCount == 0 {
 			// node.SetClass(targetClass)
 			nodesToTransit = append(nodesToTransit, node)
+			klog.Info("Node:" + node.Name + " has no pod!")
 			continue
 		}
 
@@ -109,11 +112,15 @@ func (sc *SilencerScaler) silenceActiveNodes() error {
 	nodeTransition.nodesList = nodesToTransit
 	sc.setTransitions(nodeTransition)
 
+	klog.Info("Finished silencing active nodes")
+
 	return nil
 }
 
 // For every idle node, checks if it has been idle for a while, then silences them to off class
 func (sc *SilencerScaler) silenceIdleNodes() error {
+	klog.Info("Silencing Idle nodes")
+
 	// Only available for the proposed scaler
 	activeScaler := cluster.MasterNode().Labels[consts.ACTIVE_SCALER_LABEL_NAME]
 	if activeScaler != consts.PROPOSED_SCALER {
@@ -141,6 +148,8 @@ func (sc *SilencerScaler) silenceIdleNodes() error {
 	nodeTransition.to = consts.OFF_CLASS
 	nodeTransition.nodesList = nodesToTransit
 	sc.setTransitions(nodeTransition)
+
+	klog.Info("Finished silencing active nodes")
 
 	return nil
 }

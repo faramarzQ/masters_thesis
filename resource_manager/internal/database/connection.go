@@ -28,7 +28,7 @@ func Init() {
 	DBConn = db
 
 	db.AutoMigrate(
-		// &model.ScalingLog{},
+		&model.ScalingLog{},
 		&model.ScalerExecutionLog{},
 		&model.ScalerExecutionLogDetails{},
 	)

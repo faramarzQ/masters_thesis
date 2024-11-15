@@ -68,9 +68,17 @@ func (bs *baseScaler) scale() {
 	for i := 0; i < len(bs.nodeTransitions); i++ {
 		toClass := bs.nodeTransitions[i].to
 		for j := 0; j < len(bs.nodeTransitions[i].nodesList); j++ {
+
+			// Don't turn off or make idle a node which has a po on it!
+			// Only happens for silencer scaler.
+			if len(bs.nodeTransitions[i].nodesList[j].ListPods()) > 0 &&
+				(toClass == consts.IDLE_CLASS || toClass == consts.OFF_CLASS) {
+				continue
+			}
+
 			node := bs.nodeTransitions[i].nodesList[j]
 			node.SetClass(toClass)
-			// repository.InsertScalingLog(scalerExecutionLog, node.Name, toClass)
+			repository.InsertScalingLog(scalerExecutionLog, node.Name, toClass)
 
 			klog.Info("Transitioned \"" + node.Name + "\" From \"" + string(bs.nodeTransitions[i].from) + "\" To \"" + string(toClass) + "\"")
 		}
