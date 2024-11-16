@@ -116,3 +116,19 @@ func (p Pod) GetMetrics() *v1beta1.PodMetrics {
 
 	return podMetrics
 }
+
+func ListAllPods() PodList {
+	pods, err := Clientset.CoreV1().Pods(config.CLUSTER_NAMESPACE).List(context.Background(), metav1.ListOptions{
+		LabelSelector: "app=fibonacci",
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	podList := PodList{}
+	for _, pod := range pods.Items {
+		podList = append(podList, BindPod(pod))
+	}
+
+	return podList
+}

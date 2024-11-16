@@ -55,12 +55,23 @@ func (sc *SilencerScaler) silenceActiveNodes() error {
 		targetClass = consts.IDLE_CLASS
 	}
 
+	allPods := cluster.ListAllPods()
+
+	if len(allPods) == 1 {
+		for _, pod := range allPods {
+			pod.UnsetWarm()
+
+			klog.Info("Unset warm label from ", pod.Name+" pod on "+pod.Spec.NodeName+" node")
+		}
+		return nil
+	}
+
 	var nodesToTransit cluster.NodeList
 	for _, node := range nodes {
 		podCount := len(node.ListPods())
 
 		// If node has more than one pod or is utilized, unset warm pods and pass
-		if podCount > 1 || node.GetCpuUtilization() != 0 {
+		if podCount > 1 || node.GetCpuUtilization() > 1 {
 			for _, pod := range node.ListPods() {
 				if pod.IsAlreadyWarm() {
 					klog.Info("Unset warm label from ", pod.Name+" pod on "+node.Name+" node")
@@ -73,14 +84,13 @@ func (sc *SilencerScaler) silenceActiveNodes() error {
 
 		// If node has no pod, idle it
 		if podCount == 0 {
-			// node.SetClass(targetClass)
 			nodesToTransit = append(nodesToTransit, node)
 			klog.Info("Node:" + node.Name + " has no pod!")
 			continue
 		}
 
 		// If node only has one pod with no utilization
-		if node.GetCpuUtilization() == 0 {
+		if node.GetCpuUtilization() < 1 {
 			pod := node.ListPods()[0]
 			warmPodDuration, err := strconv.Atoi(os.Getenv("SILENCER_SCALER_WARM_POD_DURATION_MINUTES"))
 			if err != nil {
@@ -91,10 +101,11 @@ func (sc *SilencerScaler) silenceActiveNodes() error {
 			if pod.IsAlreadyWarm() {
 				// if has been warm for a while
 				warmedAt := pod.GetWarmedAt()
-				if warmedAt.Add(time.Minute*time.Duration(warmPodDuration)).Unix() < time.Now().Unix() {
+				if time.Now().After(warmedAt.Add(time.Minute * time.Duration(warmPodDuration))) {
 					nodesToTransit = append(nodesToTransit, node)
 					pod.UnsetWarm()
 					klog.Info("Unset warm label from ", pod.Name+" pod on "+node.Name+" node")
+					// Q: so now we have an idle node with a pod on it?
 				}
 
 				continue
