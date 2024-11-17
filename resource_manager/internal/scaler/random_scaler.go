@@ -28,6 +28,8 @@ func (rs *RandomScaler) shouldScale(clusterMetrics cluster.ClusterMetrics) bool 
 	klog.Info(consts.MSG_RUNNING_SHOULD_SCALE)
 	defer klog.Info(consts.MSG_FINISHED_SHOULD_SCALE)
 
+	return true
+
 	rand.Seed(time.Now().UnixNano())
 	randNum := rand.Intn(100)
 
@@ -46,10 +48,15 @@ func (rs *RandomScaler) planScaling(clusterMetrics cluster.ClusterMetrics) error
 	klog.Info(consts.MSG_RUNNING_SCALE_PLANNING)
 	defer klog.Info(consts.MSG_FINISHED_SCALE_PLANNING)
 
-	percentOfNodesToTransit, err := strconv.ParseFloat(os.Getenv("RANDOM_SCALER_PERCENT_OF_NODES_TO_TRANSIT"), 64)
+	maxPercentOfNodesToTransit, err := strconv.ParseFloat(os.Getenv("RANDOM_SCALER_PERCENT_OF_NODES_TO_TRANSIT"), 64)
 	if err != nil {
 		return err
 	}
+
+	min := 9
+
+	rand.Seed(time.Now().UnixNano())
+	percentOfNodesToTransit := float64(rand.Intn(int(maxPercentOfNodesToTransit)-min)) + float64(min)
 
 	klog.Info("Percent of nodes to transit: ", percentOfNodesToTransit)
 
